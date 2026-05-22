@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>M.interior — Thiết Kế Nội Thất Tự Động AI</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Thiết kế và mô phỏng phối cảnh nội thất, không gian sống tự động bằng AI trong 30 giây. Upload ảnh phòng thực tế và chọn phong cách phù hợp.">
+  <meta name="theme-color" content="#0a0a0f">
+  
+  <!-- Manifest & PWA Support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="M.interior">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="interior.css?v=2.0">
+</head>
+<body>
+
+  <!-- App Container -->
+  <div class="app-container">
+    
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <div class="logo-circle">
+          <span class="logo-emoji">🛋️</span>
+        </div>
+        <div class="logo-text">
+          <h1>M.INTERIOR</h1>
+          <p>Thiết Kế Nội Thất Tự Động AI</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <div class="server-badge connected" id="serverBadge">
+          <span class="badge-dot"></span>
+          <span class="badge-text">Đã kết nối</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="app-main">
+
+      <!-- Tab 1: Design Input -->
+      <div class="tab-content active" id="tab-design">
+        <!-- Upload Section -->
+        <section class="card upload-section">
+          <div class="card-header">
+            <div class="step-num">1</div>
+            <h2>Upload ảnh phòng thực tế hiện trạng</h2>
+          </div>
+          
+          <input type="file" id="imageInput" accept="image/*" style="display: none;">
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-content" id="uploadPlaceholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p class="upload-title">Nhấp để chụp hoặc chọn ảnh phòng</p>
+              <p class="upload-subtitle">Kéo thả ảnh phòng hiện trạng vào đây</p>
+            </div>
+            <div class="preview-container" id="previewContainer" style="display: none;">
+              <img id="imagePreview" src="" alt="Room preview">
+              <button class="btn-remove-img" id="btnRemoveImage" type="button" title="Xóa ảnh">✕</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Interior Selection & Options Section -->
+        <section class="card type-section">
+          <div class="card-header">
+            <div class="step-num">2</div>
+            <h2>Chọn không gian &amp; Phong cách</h2>
+          </div>
+          
+          <!-- Room Type Grid -->
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted);">Loại phòng / Không gian</label>
+            <div class="curtain-grid" id="interiorGrid">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+
+          <div style="border-top: 1.5px solid rgba(255, 255, 255, 0.08); margin: 20px 0; opacity: 0.8;"></div>
+          
+          <div class="options-group">
+            <!-- Color Picker -->
+            <div class="option-field">
+              <label>Tông màu &amp; Vật liệu chủ đạo</label>
+              <div class="color-palette" id="colorPalette">
+                <!-- Populated dynamically via JS -->
+              </div>
+              <div class="custom-color-wrap">
+                <input type="text" id="customColor" placeholder="Màu/Vật liệu tự chọn (VD: Gỗ walnut, đá trắng vân mây...)">
+              </div>
+            </div>
+            
+            <!-- Design Style -->
+            <div class="option-field">
+              <label>Phong cách thiết kế</label>
+              <div class="install-options" id="styleOptions">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- Advanced Settings Toggle -->
+            <div class="advanced-toggle" id="advancedToggle">
+              <span>⚙️ Cấu hình nâng cao</span>
+              <span class="arrow">▼</span>
+            </div>
+
+            <div class="advanced-panel" id="advancedPanel" style="display: none;">
+              <div class="form-grid">
+                <div class="field">
+                  <label>Tỉ lệ ảnh đầu ra</label>
+                  <select id="outputRatio">
+                    <option value="ORIGINAL" selected>📐 Giữ nguyên tỷ lệ ảnh gốc</option>
+                    <option value="SQUARE">1:1 (Square)</option>
+                    <option value="LANDSCAPE">4:3 (Landscape)</option>
+                    <option value="PORTRAIT">3:4 (Portrait)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Số lượng ảnh</label>
+                  <select id="outputQuantity">
+                    <option value="1" selected>1 ảnh</option>
+                    <option value="2">2 ảnh</option>
+                    <option value="3">3 ảnh</option>
+                    <option value="4">4 ảnh</option>
+                  </select>
+                </div>
+                <div class="field" style="display: none;">
+                  <label>Model AI</label>
+                  <select id="aiModel">
+                    <option value="Nano_Banana_Pro" selected>Nano Banana Pro</option>
+                    <option value="Imagen_4">Imagen 4</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Action Button -->
+        <div class="action-container">
+          <button class="btn btn-primary" id="btnGenerate" disabled>
+            <span class="btn-text">🪄 Thiết Kế Nội Thất AI</span>
+            <span class="btn-loading" style="display: none;">
+              <span class="spinner"></span>
+              <span class="loading-status">Đang phân tích không gian...</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab: Sinh hoạt thực tế (Lived-in) -->
+      <div class="tab-content" id="tab-lived-in">
+        <!-- Upload Section -->
+        <section class="card upload-section">
+          <div class="card-header">
+            <div class="step-num">1</div>
+            <h2>Upload ảnh phòng thực tế hiện trạng</h2>
+          </div>
+          
+          <input type="file" id="livedInImageInput" accept="image/*" style="display: none;">
+          <div class="upload-area" id="livedInUploadArea">
+            <div class="upload-content" id="livedInUploadPlaceholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p class="upload-title">Nhấp để chụp hoặc chọn ảnh phòng</p>
+              <p class="upload-subtitle">Kéo thả ảnh phòng hiện trạng vào đây</p>
+            </div>
+            <div class="preview-container" id="livedInPreviewContainer" style="display: none;">
+              <img id="livedInImagePreview" src="" alt="Room preview">
+              <button class="btn-remove-img" id="btnRemoveLivedInImage" type="button" title="Xóa ảnh">✕</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Lived-in Config Section -->
+        <section class="card type-section">
+          <div class="card-header">
+            <div class="step-num">2</div>
+            <h2>Chọn nhân vật &amp; Thời gian</h2>
+          </div>
+          
+          <div class="options-group">
+            <!-- Subject Selection -->
+            <div class="option-field">
+              <label>Nhân vật hoạt động trong phòng</label>
+              <div class="install-options" id="livedInSubjectOptions">
+                <div class="install-item active" data-value="nam">
+                  <div class="preset-icon-container">👨</div>
+                  <div class="preset-card-title">Nam (Male)</div>
+                </div>
+                <div class="install-item" data-value="nữ">
+                  <div class="preset-icon-container">👩</div>
+                  <div class="preset-card-title">Nữ (Female)</div>
+                </div>
+                <div class="install-item" data-value="bé trai">
+                  <div class="preset-icon-container">👦</div>
+                  <div class="preset-card-title">Bé trai (Boy)</div>
+                </div>
+                <div class="install-item" data-value="bé gái">
+                  <div class="preset-icon-container">👧</div>
+                  <div class="preset-card-title">Bé gái (Girl)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Time Selection -->
+            <div class="option-field">
+              <label>Thời gian (Bối cảnh ánh sáng)</label>
+              <div class="install-options" id="livedInTimeOptions">
+                <div class="install-item active" data-value="sáng">
+                  <div class="preset-icon-container">☀️</div>
+                  <div class="preset-card-title">Ban ngày (Morning)</div>
+                </div>
+                <div class="install-item" data-value="tối">
+                  <div class="preset-icon-container">🌙</div>
+                  <div class="preset-card-title">Buổi tối (Night)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ratio Selection -->
+            <div class="option-field">
+              <label>Tỉ lệ ảnh đầu ra</label>
+              <select id="livedInRatio" style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm); color: var(--text); padding: 8px 10px; font-size: 13px; outline: none; font-family: var(--font);">
+                <option value="ORIGINAL" selected>📐 Giữ nguyên tỷ lệ ảnh gốc</option>
+                <option value="SQUARE">1:1 (Vuông)</option>
+                <option value="LANDSCAPE">4:3 (Ngang)</option>
+                <option value="PORTRAIT">3:4 (Dọc)</option>
+              </select>
+            </div>
+
+            <!-- Quantity Selection -->
+            <div class="option-field">
+              <label>Số lượng ảnh phối cảnh</label>
+              <select id="livedInQuantity" style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm); color: var(--text); padding: 8px 10px; font-size: 13px; outline: none; font-family: var(--font);">
+                <option value="1" selected>1 ảnh</option>
+                <option value="2">2 ảnh</option>
+                <option value="3">3 ảnh</option>
+                <option value="4">4 ảnh</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Action Button -->
+        <div class="action-container">
+          <button class="btn btn-primary" id="btnGenerateLivedIn" disabled>
+            <span class="btn-text">🪄 Tạo Ảnh Sinh Hoạt AI</span>
+            <span class="btn-loading" style="display: none;">
+              <span class="spinner"></span>
+              <span class="loading-status">Đang phân tích không gian phòng...</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 2: Result -->
+      <div class="tab-content" id="tab-result">
+        <div id="resultPlaceholder" class="card result-placeholder-card">
+          <div class="placeholder-content">
+            <span class="placeholder-icon">✨</span>
+            <h3>Chưa có phối cảnh nào</h3>
+            <p>Chọn ảnh phòng và cấu hình phong cách ở tab <strong>Thiết kế</strong>, sau đó nhấn nút để bắt đầu tạo.</p>
+          </div>
+        </div>
+
+        <!-- Result Section -->
+        <section class="card result-section" id="resultSection" style="display: none;">
+          <div class="card-header">
+            <div class="step-num">✨</div>
+            <h2>Kết quả phối cảnh nội thất AI</h2>
+          </div>
+          
+          <div class="result-display">
+            <div class="result-image-wrapper" id="resultImageWrapper">
+              <img id="resultImage" src="" alt="Generated interior">
+              <div class="result-badge">AI Render</div>
+            </div>
+            
+            <div class="result-grid-wrapper" id="resultGridWrapper" style="display: none; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+              <!-- Dynamically populated multiple results -->
+            </div>
+            
+            <div class="result-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a class="btn btn-outline" id="btnDownload" href="#" download="mkg-interior-design.jpg">📥 Tải Phối Cảnh</a>
+              <button class="btn btn-outline" id="btnReuseAsInput">🔄 Dùng Làm Ảnh Gốc</button>
+            </div>
+          </div>
+
+          <div class="result-prompt-box" style="display: none;">
+            <label>Prompt AI được sinh tự động:</label>
+            <textarea id="resultPrompt" readonly rows="3"></textarea>
+          </div>
+        </section>
+      </div>
+
+      <!-- Tab 3: Đồng bộ góc nhìn (tab-multi-angle) -->
+      <div class="tab-content" id="tab-multi-angle">
+        <section class="card upload-section">
+          <div class="card-header">
+            <div class="step-num">1</div>
+            <h2>Upload ảnh phòng hiện trạng (1 hoặc 2 ảnh)</h2>
+          </div>
+          <div class="upload-area" id="maUploadZone" style="min-height: 120px;">
+            <input type="file" id="maImageInput" accept="image/*" multiple style="display: none;">
+            <div class="upload-content" id="maPlaceholder">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <p class="upload-title">Kéo thả hoặc click để upload ảnh các mặt của phòng</p>
+              <p class="upload-subtitle">Giới hạn 1 - 2 ảnh gốc</p>
+            </div>
+            <div id="maPreviewGrid" style="display: flex; gap: 8px; padding: 12px; flex-wrap: wrap; justify-content: center;"></div>
+          </div>
+        </section>
+
+        <section class="card options-section" style="margin-top: 15px;">
+          <div class="card-header">
+            <div class="step-num">2</div>
+            <h2>Cấu hình góc camera &amp; Số lượng</h2>
+          </div>
+          <div class="options-group" style="padding: 16px;">
+            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted);">Góc camera cần tạo</label>
+            <div id="maAngleOptions" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-bottom: 16px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+                <input type="checkbox" value="Góc chụp gốc (như ảnh tham chiếu)" checked style="accent-color: var(--primary-gold);"> Góc nguyên bản
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+                <input type="checkbox" value="Toàn cảnh Panorama" checked style="accent-color: var(--primary-gold);"> Toàn cảnh Panorama
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+                <input type="checkbox" value="Góc quay 90 độ" checked style="accent-color: var(--primary-gold);"> Góc quay 90 độ
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+                <input type="checkbox" value="Góc từ trên xuống (Top-down)" checked style="accent-color: var(--primary-gold);"> Từ trên xuống
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+                <input type="checkbox" value="Cận cảnh chi tiết đồ nội thất" style="accent-color: var(--primary-gold);"> Cận cảnh chi tiết
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+                <input type="checkbox" value="Góc nhìn từ cửa phòng nhìn vào" style="accent-color: var(--primary-gold);"> Từ cửa nhìn vào
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+                <input type="checkbox" value="Chụp từ trong góc phòng nhìn ra ngoài" style="accent-color: var(--primary-gold);"> Từ trong góc phòng
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+                <input type="checkbox" value="Chụp từ hướng ngược lại hoàn toàn" style="accent-color: var(--primary-gold);"> Góc ngược lại
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+                <input type="checkbox" value="Tạo Mood Board" style="accent-color: var(--primary-gold);"> Tạo Mood Board
+              </label>
+            </div>
+
+            <div class="form-grid" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 15px; margin-top: 15px;">
+              <div class="field">
+                <label>Số lượng ảnh mỗi góc</label>
+                <select id="maQuantity" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 8px 10px; font-size: 13px;">
+                  <option value="1" selected>1 ảnh</option>
+                  <option value="2">2 ảnh</option>
+                  <option value="3">3 ảnh</option>
+                  <option value="4">4 ảnh</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Tỉ lệ ảnh góc</label>
+                <select id="maRatio" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 8px 10px; font-size: 13px;">
+                  <option value="SQUARE">1:1 (Square)</option>
+                  <option value="LANDSCAPE" selected>4:3 (Landscape)</option>
+                  <option value="PORTRAIT">3:4 (Portrait)</option>
+                </select>
+              </div>
+            </div>
+            
+            <button class="btn btn-primary" id="maGenerateBtn" style="width: 100%; margin-top: 20px;">
+              <span class="btn-text">🤖 Phân Tích Phòng &amp; Tạo Góc Nhìn</span>
+              <span class="btn-loading" style="display: none;"><span class="spinner"></span> Đang phân tích góc nhìn 3D...</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Result Section -->
+        <section class="card result-section" id="maOutputSection" style="display: none; margin-top: 15px;">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="step-num">✨</div>
+              <h2>Danh sách góc nhìn được AI phân tích</h2>
+            </div>
+          </div>
+          <div id="maResultGrid" style="padding: 16px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- Angle cards dynamic -->
+          </div>
+        </section>
+      </div>
+
+      <!-- Tab 4: History -->
+      <div class="tab-content" id="tab-history">
+        <div id="historyPlaceholder" class="card history-placeholder-card">
+          <div class="placeholder-content">
+            <span class="placeholder-icon">📂</span>
+            <h3>Lịch sử thiết kế trống</h3>
+            <p>Các phối cảnh được thiết kế thành công sẽ tự động lưu trữ tại đây.</p>
+          </div>
+        </div>
+
+        <section class="card history-section" id="historySection" style="display: none;">
+          <div class="card-header">
+            <div class="step-num">📂</div>
+            <h2>Lịch sử thiết kế của bạn</h2>
+          </div>
+          <div class="history-grid" id="historyGrid">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+      </div>
+
+      <!-- Tab 5: Settings -->
+      <div class="tab-content" id="tab-settings">
+        <section class="card settings-section">
+          <div class="card-header">
+            <div class="step-num">⚙️</div>
+            <h2>Cấu hình Đóng dấu Watermark &amp; Tài khoản</h2>
+          </div>
+          
+          <div class="settings-form" style="padding: 16px; display: flex; flex-direction: column; gap: 14px;">
+            <!-- Watermark Setup -->
+            <div class="form-grid-settings">
+              <div class="field" style="grid-column: span 2;">
+                <label>Logo đóng dấu bản quyền (PNG trong suốt)</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <input type="file" id="watermarkLogoInput" accept="image/png, image/jpeg" style="display: none;">
+                  <button class="btn btn-outline" type="button" onclick="document.getElementById('watermarkLogoInput').click()" style="min-height: auto; padding: 8px 14px; font-size: 12px; width: auto;">Chọn Logo</button>
+                  <button class="btn btn-outline" id="btnRemoveWatermark" style="display: none; min-height: auto; padding: 8px 14px; font-size: 12px; width: auto; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: var(--danger);">Xóa Logo</button>
+                </div>
+                <div id="watermarkPreviewContainer" style="display: none; margin-top: 10px; padding: 8px; border: 1px dashed rgba(255,255,255,0.08); border-radius: var(--radius-sm); width: max-content; background: rgba(0,0,0,0.2);">
+                  <img id="watermarkLogoPreview" src="" alt="Logo Watermark Preview" style="max-height: 40px; display: block; object-fit: contain;">
+                </div>
+              </div>
+              <div class="field">
+                <label>Vị trí đóng dấu</label>
+                <select id="watermarkPosition">
+                  <option value="bottom-right" selected>Dưới - Phải (Bottom-Right)</option>
+                  <option value="bottom-left">Dưới - Trái (Bottom-Left)</option>
+                  <option value="top-right">Trên - Phải (Top-Right)</option>
+                  <option value="top-left">Trên - Trái (Top-Left)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Kích thước logo (% rộng ảnh)</label>
+                <select id="watermarkSize">
+                  <option value="0.10">10%</option>
+                  <option value="0.15" selected>15% (Mặc định)</option>
+                  <option value="0.20">20%</option>
+                  <option value="0.25">25%</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Độ mờ logo (Opacity)</label>
+                <select id="watermarkOpacity">
+                  <option value="0.4">40% (Mờ)</option>
+                  <option value="0.6">60%</option>
+                  <option value="0.8" selected>80% (Mặc định)</option>
+                  <option value="1.0">100% (Rõ)</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="settings-actions" style="margin-top: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <button class="btn btn-primary" id="saveSettings" style="width: auto; padding: 10px 20px; font-size: 13px; min-height: auto;">💾 Lưu &amp; Đồng bộ</button>
+              <span class="settings-status" id="settingsStatus"></span>
+              <div id="pbSyncStatus" class="pb-status offline" style="font-size: 11px;">🔴 PocketBase: Offline</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer-note">
+      <p>© 2026 M.interior. All rights reserved.</p>
+    </footer>
+
+    <!-- Bottom Tab Bar Navigation -->
+    <div class="pwa-tabbar">
+      <button class="tab-item active" data-tab="tab-design">
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.34771 19.4891 5.48523 20.218 5.18731 20.8138L5 21.1885C4.70425 21.78 5.0931 22 5.7533 22H12Z"/>
+            <circle cx="7.5" cy="10.5" r="1" fill="currentColor"/>
+            <circle cx="11.5" cy="7.5" r="1" fill="currentColor"/>
+            <circle cx="16.5" cy="9.5" r="1" fill="currentColor"/>
+            <circle cx="15.5" cy="14.5" r="1" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="tab-label">Thiết kế</span>
+      </button>
+      <button class="tab-item" data-tab="tab-lived-in" id="tabLivedInBtn">
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
+        </span>
+        <span class="tab-label">Sinh hoạt</span>
+      </button>
+      <button class="tab-item" data-tab="tab-multi-angle" id="tabMultiAngleBtn">
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 18V8.2c0-1 .6-1.9 1.5-2.2L12 3l6.5 3c.9.3 1.5 1.2 1.5 2.2V18"/>
+            <path d="M12 21V9"/>
+            <circle cx="12" cy="9" r="2"/>
+          </svg>
+        </span>
+        <span class="tab-label">Góc nhìn</span>
+      </button>
+      <button class="tab-item" data-tab="tab-result" id="tabResultBtn">
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/>
+            <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z"/>
+            <path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z"/>
+          </svg>
+        </span>
+        <span class="tab-label">Kết quả</span>
+      </button>
+      <button class="tab-item" data-tab="tab-history">
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24">
+            <path d="M3 9a2 2 0 0 1 2-2h.93a2 2 0 0 0 1.664-.89l.812-1.22A2 2 0 0 1 10.07 4H19a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <circle cx="12" cy="13" r="3"/>
+            <path d="M12 11.5V13h1.5"/>
+          </svg>
+        </span>
+        <span class="tab-label">Lịch sử</span>
+      </button>
+      <button class="tab-item" data-tab="tab-settings" id="tabSettingsBtn">
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="tab-label">Cấu hình</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">✕</button>
+    <img id="lightboxImg" src="" alt="Full image">
+    <div class="lightbox-actions" style="display: flex; gap: 8px;">
+      <a class="btn btn-primary" id="lightboxDownload" href="#" download>📥 Tải ảnh</a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="pb.js"></script>
+  <script src="interior.js?v=2.0"></script>
+</body>
+</html>
