@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 52" fill="none">
+  <defs>
+    <linearGradient id="sGoldI" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8C96A"/>
+      <stop offset="50%" stop-color="#CDA869"/>
+      <stop offset="100%" stop-color="#A07835"/>
+    </linearGradient>
+    <filter id="glowI">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- S mark circle -->
+  <circle cx="26" cy="26" r="22" fill="rgba(205,168,105,0.08)" stroke="url(#sGoldI)" stroke-width="1"/>
+
+  <!-- S letter -->
+  <text x="26" y="33"
+        font-family="'Georgia', serif"
+        font-size="26" font-weight="700"
+        text-anchor="middle"
+        fill="url(#sGoldI)"
+        filter="url(#glowI)">S</text>
+
+  <!-- Product name: S.INTERIOR -->
+  <text x="57" y="24"
+        font-family="'Arial', sans-serif"
+        font-size="16" font-weight="700"
+        fill="#FFFFFF"
+        letter-spacing="1.5">S.INTERIOR</text>
+
+  <text x="58" y="38"
+        font-family="'Arial', sans-serif"
+        font-size="8" font-weight="400"
+        fill="#CDA869"
+        letter-spacing="1.5"
+        opacity="0.8">THIẾT KẾ NỘI THẤT AI</text>
+</svg>

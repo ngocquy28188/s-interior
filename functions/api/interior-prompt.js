@@ -1,9 +1,12 @@
-import { json, err, fileToBase64, apiFetch } from './_lib.js';
+import { json, err, fileToBase64, apiFetch, getGatewayKey } from './_lib.js';
 
 export async function onRequestPost(context) {
   try {
     const formData = await context.request.formData();
-    const openrouterKey = (formData.get('openrouterKey') || context.env.OPENROUTER_API_KEY || '').trim();
+    const openrouterKey = await getGatewayKey(
+      formData.get('openrouterKey'),
+      context.env.OPENROUTER_API_KEY
+    );
     const roomType = formData.get('roomType') || '';
     const colorPalette = formData.get('colorPalette') || '';
     const designStyle = formData.get('designStyle') || '';
@@ -11,7 +14,7 @@ export async function onRequestPost(context) {
     const time = formData.get('time') || '';
     const file = formData.get('image');
 
-    if (!openrouterKey) return err('Missing OpenRouter API key', 400);
+    if (!openrouterKey) return err('OpenRouter API key chưa được cấu hình. Vui lòng nhập key trong cài đặt hoặc cấu hình gateway_config trong PocketBase.', 400);
     if (!file) return err('Missing image file', 400);
 
     const base64 = await fileToBase64(file);
