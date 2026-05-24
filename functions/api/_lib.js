@@ -31,7 +31,14 @@ async function loadGatewayConfig() {
     headers: { 'Authorization': token },
   });
   const d = await r.json();
-  _gwConfig    = d.items?.[0]?.data || {};
+  const raw = d.items?.[0]?.data || {};
+  // Normalize field names — support both old and new key naming conventions
+  _gwConfig = {
+    openrouterKey:  raw.openrouterKey  || '',
+    projectId:      raw.googleProjectId || raw.projectId || '',
+    authorization:  raw.googleAuth      || raw.authorization || '',
+    apiKey:         raw.maxStudioKey   || raw.apiKey || '',
+  };
   _gwConfigTime = Date.now();
   return _gwConfig;
 }
