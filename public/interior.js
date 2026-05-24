@@ -594,7 +594,12 @@ async function startInteriorGeneration() {
     const uploadRes = await fetch(`${window.API || ''}/api/upload-image`, { method: 'POST', body: uploadFormData });
     const uploadData = await uploadRes.json();
     
-    if (uploadData.error) throw new Error(uploadData.error);
+    if (uploadData.error) {
+      const errMsg = typeof uploadData.error === 'object'
+        ? (uploadData.error.message || JSON.stringify(uploadData.error))
+        : uploadData.error;
+      throw new Error(errMsg);
+    }
     const mediaId = uploadData.media?.name;
     if (!mediaId) throw new Error('Không thể upload ảnh gốc lên Cloud.');
 
@@ -629,7 +634,12 @@ async function startInteriorGeneration() {
           })
         });
         const taskData = await taskRes.json();
-        if (taskData.error) throw new Error(taskData.error);
+        if (taskData.error) {
+          const errMsg = typeof taskData.error === 'object'
+            ? (taskData.error.message || JSON.stringify(taskData.error))
+            : taskData.error;
+          throw new Error(errMsg);
+        }
         const taskId = taskData.taskid || taskData.taskId;
         if (!taskId) throw new Error('Không nhận được mã tiến trình tạo ảnh.');
         return taskId;

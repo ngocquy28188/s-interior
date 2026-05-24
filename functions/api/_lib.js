@@ -51,6 +51,26 @@ export async function getGatewayKey(formKey, envKey) {
   }
 }
 
+/**
+ * Trả về toàn bộ gateway config từ PocketBase
+ * { openrouterKey, projectId, authorization, apiKey, maxStudioKey }
+ * Merge với override (từ form/client) — client luôn ưu tiên
+ */
+export async function getFullGatewayConfig(override = {}) {
+  let cfg = {};
+  try {
+    cfg = await loadGatewayConfig();
+  } catch (e) {
+    console.warn('[GATEWAY] Could not load full config from DB:', e.message);
+  }
+  return {
+    openrouterKey:  (override.openrouterKey  || cfg.openrouterKey  || '').trim(),
+    projectId:      (override.projectId      || cfg.projectId      || '').trim(),
+    authorization:  (override.authorization  || cfg.authorization  || '').trim(),
+    apiKey:         (override.apiKey         || cfg.apiKey         || cfg.maxStudioKey || '').trim(),
+  };
+}
+
 export function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
