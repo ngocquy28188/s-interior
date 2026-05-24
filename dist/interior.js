@@ -588,6 +588,8 @@ async function startInteriorGeneration() {
     // 3. Upload source image via upload-image API
     const uploadFormData = new FormData();
     uploadFormData.append('image', selectedImageFile);
+    if (settings.projectId) uploadFormData.append('projectId', settings.projectId);
+    if (settings.authorization) uploadFormData.append('authorization', settings.authorization);
 
     const uploadRes = await fetch(`${window.API || ''}/api/upload-image`, { method: 'POST', body: uploadFormData });
     const uploadData = await uploadRes.json();
@@ -620,7 +622,10 @@ async function startInteriorGeneration() {
             quantity: 1, // Enforce 1 to guarantee upstream returns separate images
             ratio: outputRatio,
             model: aiModel,
-            mediaId: mediaId
+            mediaId: mediaId,
+            apiKey: settings.apiKey || '',
+            projectId: settings.projectId || '',
+            authorization: settings.authorization || ''
           })
         });
         const taskData = await taskRes.json();
@@ -802,6 +807,8 @@ async function startLivedInGeneration() {
     // 3. Upload source image via upload-image API
     const uploadFormData = new FormData();
     uploadFormData.append('image', selectedLivedInImageFile);
+    if (settings.projectId) uploadFormData.append('projectId', settings.projectId);
+    if (settings.authorization) uploadFormData.append('authorization', settings.authorization);
 
     const uploadRes = await fetch(`${window.API || ''}/api/upload-image`, { method: 'POST', body: uploadFormData });
     const uploadData = await uploadRes.json();
@@ -834,7 +841,10 @@ async function startLivedInGeneration() {
             quantity: 1, // Enforce 1
             ratio: outputRatio,
             model: aiModel,
-            mediaId: mediaId
+            mediaId: mediaId,
+            apiKey: settings.apiKey || '',
+            projectId: settings.projectId || '',
+            authorization: settings.authorization || ''
           })
         });
         const taskData = await taskRes.json();
@@ -948,11 +958,16 @@ async function startLivedInGeneration() {
 
 // Poll Task Status
 async function pollGenerationStatus(taskId, onTick, maxRetries = 60) {
+  const settings = JSON.parse(localStorage.getItem('banana_settings') || '{}');
+  const headers = {};
+  if (settings.apiKey) {
+    headers['X-API-Key'] = settings.apiKey;
+  }
   for (let i = 0; i < maxRetries; i++) {
     onTick(i * 5);
     await new Promise(r => setTimeout(r, 5000));
     
-    const res = await fetch(`${window.API || ''}/api/check-status/${taskId}`);
+    const res = await fetch(`${window.API || ''}/api/check-status/${taskId}`, { headers });
     const data = await res.json();
     
     if (data.status === 'successfully') return data;
@@ -2129,6 +2144,7 @@ function renderMaResults() {
 async function runSequentialMultiAngleGeneration() {
   if (!maResult || !maResult.scenes || maResult.scenes.length === 0) return;
 
+  const settings = JSON.parse(localStorage.getItem('banana_settings') || '{}');
   const cards = $$('#maResultGrid .pg-prompt-card');
   const maQty = parseInt($('#maQuantity')?.value) || 1;
   const maRatio = $('#maRatio')?.value || 'LANDSCAPE';
@@ -2148,6 +2164,8 @@ async function runSequentialMultiAngleGeneration() {
 
       const formData = new FormData();
       formData.append('image', blob);
+      if (settings.projectId) formData.append('projectId', settings.projectId);
+      if (settings.authorization) formData.append('authorization', settings.authorization);
 
       const uploadRes = await fetch(`${window.API || ''}/api/upload-image`, { method: 'POST', body: formData });
       const uploadData = await uploadRes.json();
@@ -2182,7 +2200,10 @@ async function runSequentialMultiAngleGeneration() {
           prompt: scene.image_prompt,
           quantity: maQty,
           ratio: maRatio,
-          mediaId: mediaId
+          mediaId: mediaId,
+          apiKey: settings.apiKey || '',
+          projectId: settings.projectId || '',
+          authorization: settings.authorization || ''
         })
       });
       const taskData = await taskRes.json();
@@ -2245,6 +2266,7 @@ async function runSequentialMultiAngleGeneration() {
 
 window.maRetryAngle = async function(index) {
   if (!maResult || !maResult.scenes || !maResult.scenes[index]) return;
+  const settings = JSON.parse(localStorage.getItem('banana_settings') || '{}');
   const cards = $$('#maResultGrid .pg-prompt-card');
   const card = cards[index];
   if (!card) return;
@@ -2274,6 +2296,8 @@ window.maRetryAngle = async function(index) {
 
       const formData = new FormData();
       formData.append('image', blob);
+      if (settings.projectId) formData.append('projectId', settings.projectId);
+      if (settings.authorization) formData.append('authorization', settings.authorization);
 
       const uploadRes = await fetch(`${window.API || ''}/api/upload-image`, { method: 'POST', body: formData });
       const uploadData = await uploadRes.json();
@@ -2288,7 +2312,10 @@ window.maRetryAngle = async function(index) {
         prompt: scene.image_prompt,
         quantity: maQty,
         ratio: maRatio,
-        mediaId: mediaId
+        mediaId: mediaId,
+        apiKey: settings.apiKey || '',
+        projectId: settings.projectId || '',
+        authorization: settings.authorization || ''
       })
     });
     const taskData = await taskRes.json();
