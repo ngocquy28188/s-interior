@@ -3,7 +3,7 @@ import { json, err, fileToBase64, apiFetch } from './_lib.js';
 export async function onRequestPost(context) {
   try {
     const formData = await context.request.formData();
-    const openrouterKey = (formData.get('openrouterKey') || '').trim();
+    const openrouterKey = (formData.get('openrouterKey') || context.env.OPENROUTER_API_KEY || '').trim();
     const roomType = formData.get('roomType') || '';
     const colorPalette = formData.get('colorPalette') || '';
     const designStyle = formData.get('designStyle') || '';

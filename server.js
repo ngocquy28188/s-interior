@@ -24,8 +24,8 @@ const CONFIG = {
   authorization: process.env.GOOGLE_AUTHORIZATION || process.env.AUTHORIZATION || '',
   apiKey: process.env.MAX_STUDIO_API_KEY || process.env.API_KEY || '',
   openrouterKey: process.env.OPENROUTER_API_KEY || '',
-  pbEmail: process.env.PB_EMAIL || '',
-  pbPassword: process.env.PB_PASSWORD || '',
+  pbEmail: process.env.PB_EMAIL || 'quy28181818@gmail.com',
+  pbPassword: process.env.PB_PASSWORD || '@Mkg201444',
 };
 
 let _dbAuthToken = null;
