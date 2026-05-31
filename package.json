@@ -1,0 +1,17 @@
+{
+  "name": "s-interior",
+  "version": "1.0.0",
+  "description": "AI Interior Design Webapp",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "node -e \"require('fs').cpSync('public', 'dist', {recursive: true, force: true})\""
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "multer": "^1.4.5-lts.1",
+    "pocketbase": "^0.26.8"
+  }
+}
