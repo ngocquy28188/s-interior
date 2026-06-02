@@ -507,7 +507,11 @@ Return ONLY a valid JSON object: {"prompt": "your detailed prompt here"}`;
 // ────── Interior Prompt Generator ──────
 app.post('/api/interior-prompt', upload.single('image'), async (req, res) => {
   try {
-    const { roomType, colorPalette, designStyle, openrouterKey, subject, time } = req.body || {};
+    // Support both old (roomType/colorPalette/designStyle) and new (interiorType/color/style) field names
+    const roomType    = req.body.roomType    || req.body.interiorType || 'modern room';
+    const colorPalette= req.body.colorPalette|| req.body.color        || 'neutral tones';
+    const designStyle = req.body.designStyle || req.body.style        || 'contemporary';
+    const { openrouterKey, subject, time } = req.body || {};
     const activeConfig = await getDynamicConfig();
     const finalOpenRouterKey = (openrouterKey && openrouterKey.trim()) ? openrouterKey : activeConfig.openrouterKey;
     const file = req.file;
@@ -520,7 +524,8 @@ app.post('/api/interior-prompt', upload.single('image'), async (req, res) => {
     }
 
     const base64 = file.buffer.toString('base64');
-    const isLivedIn = designStyle.toLowerCase().includes('lived-in') || designStyle.toLowerCase().includes('thực tế');
+    const dsLower = (designStyle || '').toLowerCase();
+    const isLivedIn = dsLower.includes('lived-in') || dsLower.includes('thực tế');
     const systemText = `You are a professional interior design rendering prompt architect.
 Analyze the uploaded image of the room and write a detailed, high-resolution photorealistic rendering prompt in English to redesign and furnish the space based on the requested options.
 
@@ -573,8 +578,139 @@ Return ONLY a valid JSON object: {"prompt": "your detailed prompt here"}`;
   }
 });
 
+// ────── Render 3D Prompt Generator ──────
+app.post('/api/render3d-prompt', upload.single('image'), async (req, res) => {
+  try {
+    const { outputMode, spaceStyle, decorItems, openrouterKey } = req.body || {};
+    const activeConfig = await getDynamicConfig();
+    const finalOpenRouterKey = (openrouterKey && openrouterKey.trim()) ? openrouterKey : activeConfig.openrouterKey;
+    const file = req.file;
+
+    if (!finalOpenRouterKey || finalOpenRouterKey.trim() === '') {
+      return res.status(400).json({ error: 'Missing OpenRouter API key' });
+    }
+    if (!file) {
+      return res.status(400).json({ error: 'Missing image file' });
+    }
+
+    const base64 = file.buffer.toString('base64');
+    const systemText = `You are a professional 3D architectural rendering prompt engineer specializing in interior visualization.
+Analyze the uploaded image (which may be a hand-drawn sketch, floor plan, or rough photo) and produce a highly detailed render-ready AI image generation prompt in English.
+
+Your prompt MUST:
+1. Identify the existing room structure and spatial arrangement from the uploaded image (walls, openings, key furniture placement, viewing angle).
+2. Describe the scene as a: ${outputMode || 'photorealistic 3D rendering with realistic textures and natural lighting'}
+3. Apply the following interior style: ${spaceStyle || 'Modern minimalist'}
+4. Incorporate these specific decoration and lighting elements (ONLY include items that logically fit the space and do not contradict the main scene):
+   ${decorItems || 'clean minimal decor'}
+5. Describe realistic premium materials, surfaces, ambient light, and camera perspective (eye-level, wide angle interior shot).
+6. The final result must look like a professional architectural interior visualization.
+7. Do NOT describe any people or characters in the scene.
+
+Return ONLY a valid JSON object: {"prompt": "your detailed prompt here"}`;
+
+    const content = [
+      { type: 'image_url', image_url: { url: `data:${file.mimetype};base64,${base64}` } },
+      { type: 'text', text: systemText },
+    ];
+
+    const data = await apiFetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${finalOpenRouterKey.trim()}`,
+        'HTTP-Referer': 'https://img.mkg.vn',
+        'X-Title': 'Interior Render3D Prompt Gen',
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-4o-mini',
+        messages: [{ role: 'user', content }],
+        max_tokens: 1000,
+        temperature: 0.5,
+        response_format: { type: 'json_object' }
+      }),
+    });
+
+    if (data.error) {
+      return res.status(400).json({ error: data.error.message || JSON.stringify(data.error) });
+    }
+
+    const reply = data.choices?.[0]?.message?.content || '{}';
+    try {
+      res.json(JSON.parse(reply));
+    } catch {
+      res.status(500).json({ error: 'Failed to parse JSON reply from AI model', raw: reply });
+    }
+  } catch (err) {
+    console.error('render3d-prompt error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ────── Lifestyle Reality Prompt Generator ──────
+app.post('/api/lifestyle-prompt', upload.single('image'), async (req, res) => {
+  try {
+    const { stage, sceneDescription, openrouterKey } = req.body || {};
+    const activeConfig = await getDynamicConfig();
+    const finalOpenRouterKey = (openrouterKey && openrouterKey.trim()) ? openrouterKey : activeConfig.openrouterKey;
+    const file = req.file;
+
+    if (!finalOpenRouterKey?.trim()) return res.status(400).json({ error: 'Missing OpenRouter API key' });
+    if (!file) return res.status(400).json({ error: 'Missing image file' });
+
+    const base64 = file.buffer.toString('base64');
+
+    const systemText = `You are a professional architectural and lifestyle photography prompt engineer.
+Analyze the uploaded interior design image carefully, then write a photorealistic AI image generation prompt in English based on the scene description provided below.
+
+Your prompt MUST:
+1. Identify and preserve the exact room structure, furniture layout, materials, colors, and architectural features visible in the uploaded image.
+2. Incorporate the following scene/staging description naturally into the prompt: """${sceneDescription || 'realistic lived-in interior scene'}"""
+3. Describe the resulting image as a professional, candid, documentary-style photograph — NOT a 3D render.
+4. Maintain the original perspective, camera angle, and room proportions.
+5. Describe realistic lighting matching the time-of-day in the scene description.
+6. The final image should look like a real photograph, NOT a staged advertisement.
+
+Return ONLY valid JSON: {"prompt": "your complete detailed prompt here"}`;
+
+    const content = [
+      { type: 'image_url', image_url: { url: `data:${file.mimetype};base64,${base64}` } },
+      { type: 'text', text: systemText },
+    ];
+
+    const data = await apiFetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${finalOpenRouterKey.trim()}`,
+        'HTTP-Referer': 'https://img.mkg.vn',
+        'X-Title': 'Interior Lifestyle Prompt Gen',
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-4o-mini',
+        messages: [{ role: 'user', content }],
+        max_tokens: 1000,
+        temperature: 0.6,
+        response_format: { type: 'json_object' }
+      }),
+    });
+
+    if (data.error) return res.status(400).json({ error: data.error.message || JSON.stringify(data.error) });
+    const reply = data.choices?.[0]?.message?.content || '{}';
+    try {
+      res.json(JSON.parse(reply));
+    } catch {
+      res.status(500).json({ error: 'Failed to parse JSON reply', raw: reply });
+    }
+  } catch (err) {
+    console.error('lifestyle-prompt error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // ────── Material Restyle Prompt Generator ──────
+
 app.post('/api/restyle-prompt', upload.fields([{ name: 'mainImage', maxCount: 1 }, { name: 'textureImage', maxCount: 1 }]), async (req, res) => {
   try {
     const { materialName, materialDesc, openrouterKey } = req.body;

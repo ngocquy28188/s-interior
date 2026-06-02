@@ -18,12 +18,13 @@
   --text-muted: #9595a5;
   --text-inverse: #0a0a0f;
   
-  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
   --radius-lg: 20px;
   --radius-md: 12px;
   --radius-sm: 8px;
   --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Base Styles */
@@ -81,25 +82,33 @@ body {
   box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
 }
 
+.logo-mark {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 10px rgba(201, 164, 68, 0.4));
+}
+
 .logo-emoji {
   font-size: 24px;
 }
 
 .logo-text h1 {
-  font-size: 18px;
+  font-family: var(--font-serif);
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: 1px;
-  background: linear-gradient(90deg, #ffffff, var(--primary-gold));
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #f5efe0, var(--primary-gold));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .logo-text p {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.8px;
 }
 
 /* Badges */
@@ -282,12 +291,111 @@ body {
   transform: scale(1.1);
 }
 
-/* Selector Grids (Room, Color, Style) */
+/* Selector Grids (Room, Color, Style) — legacy, kept for multi-angle tab */
 .curtain-grid, .color-palette, .install-options {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 10px;
   width: 100%;
+}
+
+/* ─── Section Label ───────────────────────────────── */
+.section-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  letter-spacing: 0.4px;
+}
+
+/* ─── Divider ─────────────────────────────────────── */
+.divider-line {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  margin: 14px 0;
+}
+
+/* ─── Pill Select Group ───────────────────────────── */
+.pill-select-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  width: 100%;
+}
+
+/* ─── Pill Button ─────────────────────────────────── */
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.pill-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.pill-btn.active {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: var(--primary-gold);
+  color: var(--primary-gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.08);
+}
+
+/* ─── Decor Chip (checkbox style) ────────────────── */
+.decor-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  width: 100%;
+}
+
+.decor-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.decor-chip input[type="checkbox"] {
+  display: none;
+}
+
+.decor-chip:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text);
+}
+
+.decor-chip:has(input:checked) {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--primary-gold);
+  color: var(--primary-gold);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.06);
 }
 
 /* Selector Cards (Room Types, Color Presets, Design Styles) */
@@ -478,19 +586,46 @@ body {
   color: var(--text-muted);
 }
 
-.field select {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* ─── Dropdowns (Select) ─── */
+.field select,
+.field select option {
+  background-color: #1a1a2a;
+  color: #f0f0f5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
-  color: var(--text);
   outline: none;
   font-family: var(--font);
   font-size: 12px;
+  color-scheme: dark;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239595a5' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+  cursor: pointer;
+  transition: var(--transition);
 }
 
 .field select:focus {
   border-color: var(--primary-gold);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.08);
+}
+
+.field select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background-color: #1f1f32;
+}
+
+/* ─── Lifestyle Stage Panels ─── */
+.ls-panel {
+  animation: fadeSlideIn 0.25s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Buttons */
@@ -1800,3 +1935,262 @@ body {
 }
 
 
+
+/* ─── Mode Toggle Card ─── */
+.mode-toggle-card { padding: 18px; }
+
+.mode-toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mode-btn {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 2px 10px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.mode-btn:hover {
+  border-color: rgba(212,175,55,0.35);
+  background: rgba(212,175,55,0.05);
+}
+
+.mode-btn.active {
+  border-color: var(--primary-gold);
+  background: rgba(212,175,55,0.08);
+  box-shadow: 0 0 0 1px rgba(212,175,55,0.15), inset 0 0 20px rgba(212,175,55,0.03);
+}
+
+.mode-icon {
+  grid-row: span 2;
+  font-size: 22px;
+  text-align: center;
+  line-height: 1;
+}
+
+.mode-label {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mode-btn.active .mode-label {
+  color: var(--primary-gold);
+}
+
+.mode-desc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* Card titles use serif for luxury feel */
+.card-header h2 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+}
+
+/* ─── Pipeline Progress ─── */
+.pipeline-card {
+  padding: 16px 18px;
+  gap: 0;
+}
+
+.pipeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.pipeline-title {
+  font-family: var(--font-serif);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.3px;
+}
+
+.pipeline-reset-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+
+.pipeline-reset-btn:hover {
+  border-color: rgba(212,175,55,0.4);
+  color: var(--primary-gold);
+}
+
+.pipeline-step {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.pstep-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.pstep-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: transparent;
+  flex-shrink: 0;
+  transition: var(--transition);
+  margin-top: 2px;
+}
+
+.pstep-dot.running {
+  border-color: var(--primary-gold);
+  background: rgba(212,175,55,0.15);
+  box-shadow: 0 0 8px rgba(212,175,55,0.4);
+  animation: pulseDot 1.2s ease infinite;
+}
+
+.pstep-dot.done {
+  border-color: #34d399;
+  background: #34d399;
+}
+
+.pstep-dot.error {
+  border-color: #f87171;
+  background: #f87171;
+}
+
+@keyframes pulseDot {
+  0%,100% { box-shadow: 0 0 6px rgba(212,175,55,0.3); }
+  50%      { box-shadow: 0 0 14px rgba(212,175,55,0.7); }
+}
+
+.pstep-line {
+  width: 2px;
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  min-height: 28px;
+  margin: 4px 0;
+}
+
+.pipeline-step.last .pstep-left { height: auto; }
+
+.pstep-body {
+  flex: 1;
+  padding-bottom: 18px;
+}
+
+.pipeline-step.last .pstep-body { padding-bottom: 4px; }
+
+.pstep-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.pstep-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pstep-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: var(--transition);
+}
+
+.pstep-badge.running {
+  background: rgba(212,175,55,0.12);
+  color: var(--primary-gold);
+  border-color: rgba(212,175,55,0.3);
+}
+
+.pstep-badge.done {
+  background: rgba(52,211,153,0.1);
+  color: #34d399;
+  border-color: rgba(52,211,153,0.25);
+}
+
+.pstep-badge.error {
+  background: rgba(248,113,113,0.1);
+  color: #f87171;
+  border-color: rgba(248,113,113,0.25);
+}
+
+.pstep-detail {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pstep-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.pstep-cached {
+  font-size: 11px;
+  color: #34d399;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.pstep-retry-btn {
+  align-self: flex-start;
+  background: rgba(212,175,55,0.08);
+  border: 1px solid rgba(212,175,55,0.3);
+  color: var(--primary-gold);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+  margin-top: 2px;
+}
+
+.pstep-retry-btn:hover {
+  background: rgba(212,175,55,0.15);
+  border-color: var(--primary-gold);
+}
+
+/* ─── Tab bar text-only ─── */
+.pwa-tabbar .tab-icon { display: none; }
+.pwa-tabbar .tab-item { min-height: 44px; }
+.pwa-tabbar .tab-label { font-size: 12.5px; font-weight: 700; }

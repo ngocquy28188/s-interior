@@ -19,7 +19,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="interior.css?v=2.0">
@@ -32,12 +32,21 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-logo">
-        <div class="logo-circle">
-          <span class="logo-emoji">🛋️</span>
+        <div class="logo-mark">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <rect width="36" height="36" rx="10" fill="url(#logoGrad)"/>
+            <text x="18" y="26" text-anchor="middle" font-family="Playfair Display,serif" font-weight="700" font-size="22" fill="#0d0b09">M</text>
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36">
+                <stop offset="0%" stop-color="#e8c97a"/>
+                <stop offset="100%" stop-color="#c9a444"/>
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
         <div class="logo-text">
           <h1>M.INTERIOR</h1>
-          <p>Thiết Kế Nội Thất Tự Động AI</p>
+          <p>Luxury Interior AI Studio</p>
         </div>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
@@ -51,85 +60,87 @@
     <!-- Main Workspace -->
     <main class="app-main">
 
-      <!-- Tab 1: Design Input -->
+      <!-- Tab: Thiết kế & Dựng 3D (Merged) -->
       <div class="tab-content active" id="tab-design">
+
         <!-- Upload Section -->
         <section class="card upload-section">
           <div class="card-header">
             <div class="step-num">1</div>
-            <h2>Upload ảnh phòng thực tế hiện trạng</h2>
+            <h2>Upload ảnh phòng</h2>
           </div>
-          
-          <input type="file" id="imageInput" accept="image/*" style="display: none;">
+          <input type="file" id="imageInput" accept="image/*" style="display:none;">
           <div class="upload-area" id="uploadArea">
             <div class="upload-content" id="uploadPlaceholder">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              <p class="upload-title">Nhấp để chụp hoặc chọn ảnh phòng</p>
-              <p class="upload-subtitle">Kéo thả ảnh phòng hiện trạng vào đây</p>
+              <p class="upload-title">Nhấp hoặc kéo thả ảnh phòng</p>
+              <p class="upload-subtitle">Hỗ trợ: ảnh thực, phác thảo tay, bản vẽ</p>
             </div>
-            <div class="preview-container" id="previewContainer" style="display: none;">
+            <div class="preview-container" id="previewContainer" style="display:none;">
               <img id="imagePreview" src="" alt="Room preview">
-              <button class="btn-remove-img" id="btnRemoveImage" type="button" title="Xóa ảnh">✕</button>
+              <button class="btn-remove-img" id="btnRemoveImage" type="button">✕</button>
             </div>
           </div>
         </section>
 
-        <!-- Interior Selection & Options Section -->
-        <section class="card type-section">
+        <!-- Mode Toggle -->
+        <section class="card mode-toggle-card">
           <div class="card-header">
             <div class="step-num">2</div>
-            <h2>Chọn không gian &amp; Phong cách</h2>
+            <h2>Chọn chế độ xử lý</h2>
           </div>
-          
-          <!-- Room Type Grid -->
-          <div style="margin-bottom: 15px;">
-            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted);">Loại phòng / Không gian</label>
-            <div class="curtain-grid" id="interiorGrid">
-              <!-- Populated dynamically via JS -->
-            </div>
+          <div class="mode-toggle-group" id="designModeGroup">
+            <button class="mode-btn active" data-mode="redesign">
+              <span class="mode-icon">🎨</span>
+              <span class="mode-label">Thiết kế phong cách mới</span>
+              <span class="mode-desc">Chọn phong cách, tông màu mới hoàn toàn</span>
+            </button>
+            <button class="mode-btn" data-mode="keepstyle">
+              <span class="mode-icon">✨</span>
+              <span class="mode-label">Giữ nguyên — Thêm trang trí</span>
+              <span class="mode-desc">Giữ phong cách gốc, chỉ thêm đèn, gối, tranh…</span>
+            </button>
           </div>
+        </section>
 
-          <div style="border-top: 1.5px solid rgba(255, 255, 255, 0.08); margin: 20px 0; opacity: 0.8;"></div>
-          
+        <!-- PANEL A: Redesign (phong cách mới) -->
+        <section class="card type-section" id="panelRedesign">
+          <div class="card-header">
+            <div class="step-num">3</div>
+            <h2>Không gian &amp; Phong cách</h2>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label class="section-label">🏠 Loại phòng</label>
+            <div class="pill-select-group" id="interiorGrid"></div>
+          </div>
+          <div class="divider-line"></div>
           <div class="options-group">
-            <!-- Color Picker -->
             <div class="option-field">
-              <label>Tông màu &amp; Vật liệu chủ đạo</label>
-              <div class="color-palette" id="colorPalette">
-                <!-- Populated dynamically via JS -->
-              </div>
+              <label class="section-label">🎨 Tông màu &amp; Vật liệu</label>
+              <div class="pill-select-group" id="colorPalette"></div>
               <div class="custom-color-wrap">
-                <input type="text" id="customColor" placeholder="Màu/Vật liệu tự chọn (VD: Gỗ walnut, đá trắng vân mây...)">
+                <input type="text" id="customColor" placeholder="Tông màu tự chọn (VD: Gỗ walnut, đá trắng vân mây...)">
               </div>
             </div>
-            
-            <!-- Design Style -->
             <div class="option-field">
-              <label>Phong cách thiết kế</label>
-              <div class="install-options" id="styleOptions">
-                <!-- Populated dynamically via JS -->
-              </div>
+              <label class="section-label">✨ Phong cách thiết kế</label>
+              <div class="pill-select-group" id="styleOptions"></div>
             </div>
-
-            <!-- Advanced Settings Toggle -->
             <div class="advanced-toggle" id="advancedToggle">
               <span>⚙️ Cấu hình nâng cao</span>
               <span class="arrow">▼</span>
             </div>
-
-            <div class="advanced-panel" id="advancedPanel" style="display: none;">
+            <div class="advanced-panel" id="advancedPanel" style="display:none;">
               <div class="form-grid">
                 <div class="field">
-                  <label>Tỉ lệ ảnh đầu ra</label>
+                  <label>Tỉ lệ ảnh</label>
                   <select id="outputRatio">
-                    <option value="ORIGINAL" selected>📐 Giữ nguyên tỷ lệ ảnh gốc</option>
-                    <option value="SQUARE">1:1 (Square)</option>
-                    <option value="LANDSCAPE">4:3 (Landscape)</option>
-                    <option value="PORTRAIT">3:4 (Portrait)</option>
+                    <option value="ORIGINAL" selected>📐 Giữ nguyên</option>
+                    <option value="SQUARE">1:1 Square</option>
+                    <option value="LANDSCAPE">4:3 Ngang</option>
+                    <option value="PORTRAIT">3:4 Dọc</option>
                   </select>
                 </div>
                 <div class="field">
@@ -141,11 +152,75 @@
                     <option value="4">4 ảnh</option>
                   </select>
                 </div>
-                <div class="field" style="display: none;">
-                  <label>Model AI</label>
-                  <select id="aiModel">
-                    <option value="Nano_Banana_Pro" selected>Nano Banana Pro</option>
-                    <option value="Imagen_4">Imagen 4</option>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL B: Keep Style + Add Decor -->
+        <section class="card type-section" id="panelKeepStyle" style="display:none;">
+          <div class="card-header">
+            <div class="step-num">3</div>
+            <h2>Kiểu xuất &amp; Đồ trang trí</h2>
+          </div>
+          <div class="options-group">
+            <div class="option-field">
+              <label class="section-label">🖼️ Kiểu render</label>
+              <div class="pill-select-group" id="r3dOutputMode">
+                <button class="pill-btn active" data-value="3d-photorealistic">📸 3D thực tế</button>
+                <button class="pill-btn" data-value="3d-render">🏛️ CGI Render</button>
+                <button class="pill-btn" data-value="3d-sketch">✏️ Phác thảo 3D</button>
+                <button class="pill-btn" data-value="3d-night">🌙 Ban đêm</button>
+              </div>
+            </div>
+            <div class="option-field">
+              <label class="section-label">💡 Ánh sáng trang trí</label>
+              <div class="decor-chip-group" id="decorLighting">
+                <label class="decor-chip"><input type="checkbox" value="led-ceiling-cove" checked><span>💫 LED hắt trần</span></label>
+                <label class="decor-chip"><input type="checkbox" value="led-cabinet"><span>🔆 LED tủ kệ</span></label>
+                <label class="decor-chip"><input type="checkbox" value="pendant-light"><span>🕯️ Đèn thả</span></label>
+                <label class="decor-chip"><input type="checkbox" value="floor-lamp"><span>🪔 Đèn đứng</span></label>
+                <label class="decor-chip"><input type="checkbox" value="strip-led"><span>🌈 LED dải màu</span></label>
+              </div>
+            </div>
+            <div class="option-field">
+              <label class="section-label">🛋️ Phụ kiện mềm</label>
+              <div class="decor-chip-group" id="decorSoft">
+                <label class="decor-chip"><input type="checkbox" value="cushions" checked><span>🛏️ Gối, nệm</span></label>
+                <label class="decor-chip"><input type="checkbox" value="throw-blanket"><span>🧣 Chăn phủ</span></label>
+                <label class="decor-chip"><input type="checkbox" value="rug"><span>🟫 Thảm sàn</span></label>
+                <label class="decor-chip"><input type="checkbox" value="curtains"><span>🪟 Rèm cửa</span></label>
+              </div>
+            </div>
+            <div class="option-field">
+              <label class="section-label">🖼️ Trang trí tường &amp; Cây cối</label>
+              <div class="decor-chip-group" id="decorWall">
+                <label class="decor-chip"><input type="checkbox" value="wall-art" checked><span>🎨 Tranh treo tường</span></label>
+                <label class="decor-chip"><input type="checkbox" value="wall-mirror"><span>🪞 Gương</span></label>
+                <label class="decor-chip"><input type="checkbox" value="plant-indoor"><span>🌿 Cây nội thất</span></label>
+                <label class="decor-chip"><input type="checkbox" value="bookshelf-decor"><span>📚 Kệ trang trí</span></label>
+                <label class="decor-chip"><input type="checkbox" value="vase-flowers"><span>💐 Bình hoa</span></label>
+              </div>
+            </div>
+            <div class="option-field">
+              <label class="section-label">⚙️ Cài đặt đầu ra</label>
+              <div class="form-grid">
+                <div class="field">
+                  <label>Tỉ lệ ảnh</label>
+                  <select id="r3dRatio">
+                    <option value="ORIGINAL" selected>📐 Giữ nguyên</option>
+                    <option value="LANDSCAPE">4:3 Ngang</option>
+                    <option value="PORTRAIT">3:4 Dọc</option>
+                    <option value="SQUARE">1:1 Vuông</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Số lượng ảnh</label>
+                  <select id="r3dQuantity">
+                    <option value="1" selected>1 ảnh</option>
+                    <option value="2">2 ảnh</option>
+                    <option value="3">3 ảnh</option>
+                    <option value="4">4 ảnh</option>
                   </select>
                 </div>
               </div>
@@ -156,123 +231,78 @@
         <!-- Action Button -->
         <div class="action-container">
           <button class="btn btn-primary" id="btnGenerate" disabled>
-            <span class="btn-text">🪄 Thiết Kế Nội Thất AI</span>
-            <span class="btn-loading" style="display: none;">
+            <span class="btn-text" id="btnGenerateText">Thiết Kế Nội Thất AI</span>
+            <span class="btn-loading" style="display:none;">
               <span class="spinner"></span>
-              <span class="loading-status">Đang phân tích không gian...</span>
+              <span class="loading-status" id="mainLoadingStatus">Đang xử lý...</span>
             </span>
           </button>
         </div>
-      </div>
 
-      <!-- Tab: Sinh hoạt thực tế (Lived-in) -->
-      <div class="tab-content" id="tab-lived-in">
-        <!-- Upload Section -->
-        <section class="card upload-section">
-          <div class="card-header">
-            <div class="step-num">1</div>
-            <h2>Upload ảnh phòng thực tế hiện trạng</h2>
+        <!-- Pipeline Progress -->
+        <div class="pipeline-card card" id="pipelineCard" style="display:none;">
+          <div class="pipeline-header">
+            <span class="pipeline-title">Tiến trình xử lý</span>
+            <button class="pipeline-reset-btn" id="pipelineResetBtn">Làm lại từ đầu</button>
           </div>
-          
-          <input type="file" id="livedInImageInput" accept="image/*" style="display: none;">
-          <div class="upload-area" id="livedInUploadArea">
-            <div class="upload-content" id="livedInUploadPlaceholder">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              <p class="upload-title">Nhấp để chụp hoặc chọn ảnh phòng</p>
-              <p class="upload-subtitle">Kéo thả ảnh phòng hiện trạng vào đây</p>
-            </div>
-            <div class="preview-container" id="livedInPreviewContainer" style="display: none;">
-              <img id="livedInImagePreview" src="" alt="Room preview">
-              <button class="btn-remove-img" id="btnRemoveLivedInImage" type="button" title="Xóa ảnh">✕</button>
-            </div>
-          </div>
-        </section>
 
-        <!-- Lived-in Config Section -->
-        <section class="card type-section">
-          <div class="card-header">
-            <div class="step-num">2</div>
-            <h2>Chọn nhân vật &amp; Thời gian</h2>
-          </div>
-          
-          <div class="options-group">
-            <!-- Subject Selection -->
-            <div class="option-field">
-              <label>Nhân vật hoạt động trong phòng</label>
-              <div class="install-options" id="livedInSubjectOptions">
-                <div class="install-item active" data-value="nam">
-                  <div class="preset-icon-container">👨</div>
-                  <div class="preset-card-title">Nam (Male)</div>
-                </div>
-                <div class="install-item" data-value="nữ">
-                  <div class="preset-icon-container">👩</div>
-                  <div class="preset-card-title">Nữ (Female)</div>
-                </div>
-                <div class="install-item" data-value="bé trai">
-                  <div class="preset-icon-container">👦</div>
-                  <div class="preset-card-title">Bé trai (Boy)</div>
-                </div>
-                <div class="install-item" data-value="bé gái">
-                  <div class="preset-icon-container">👧</div>
-                  <div class="preset-card-title">Bé gái (Girl)</div>
-                </div>
+          <!-- Step 1: Prompt -->
+          <div class="pipeline-step" id="pstep-prompt" data-step="prompt">
+            <div class="pstep-left">
+              <div class="pstep-dot" id="pdot-prompt"></div>
+              <div class="pstep-line"></div>
+            </div>
+            <div class="pstep-body">
+              <div class="pstep-header-row">
+                <span class="pstep-name">Bước 1 — Phân tích & Tạo Prompt AI</span>
+                <span class="pstep-badge" id="pbadge-prompt">Chờ</span>
+              </div>
+              <div class="pstep-detail" id="pdetail-prompt" style="display:none;">
+                <div class="pstep-time" id="ptime-prompt"></div>
+                <div class="pstep-cached" id="pcached-prompt"></div>
+                <button class="pstep-retry-btn" id="pretry-prompt" style="display:none;">Chạy lại từ bước này</button>
               </div>
             </div>
+          </div>
 
-            <!-- Time Selection -->
-            <div class="option-field">
-              <label>Thời gian (Bối cảnh ánh sáng)</label>
-              <div class="install-options" id="livedInTimeOptions">
-                <div class="install-item active" data-value="sáng">
-                  <div class="preset-icon-container">☀️</div>
-                  <div class="preset-card-title">Ban ngày (Morning)</div>
-                </div>
-                <div class="install-item" data-value="tối">
-                  <div class="preset-icon-container">🌙</div>
-                  <div class="preset-card-title">Buổi tối (Night)</div>
-                </div>
+          <!-- Step 2: Upload -->
+          <div class="pipeline-step" id="pstep-upload" data-step="upload">
+            <div class="pstep-left">
+              <div class="pstep-dot" id="pdot-upload"></div>
+              <div class="pstep-line"></div>
+            </div>
+            <div class="pstep-body">
+              <div class="pstep-header-row">
+                <span class="pstep-name">Bước 2 — Upload ảnh lên Cloud</span>
+                <span class="pstep-badge" id="pbadge-upload">Chờ</span>
+              </div>
+              <div class="pstep-detail" id="pdetail-upload" style="display:none;">
+                <div class="pstep-time" id="ptime-upload"></div>
+                <div class="pstep-cached" id="pcached-upload"></div>
+                <button class="pstep-retry-btn" id="pretry-upload" style="display:none;">Chạy lại từ bước này</button>
               </div>
             </div>
+          </div>
 
-            <!-- Ratio Selection -->
-            <div class="option-field">
-              <label>Tỉ lệ ảnh đầu ra</label>
-              <select id="livedInRatio" style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm); color: var(--text); padding: 8px 10px; font-size: 13px; outline: none; font-family: var(--font);">
-                <option value="ORIGINAL" selected>📐 Giữ nguyên tỷ lệ ảnh gốc</option>
-                <option value="SQUARE">1:1 (Vuông)</option>
-                <option value="LANDSCAPE">4:3 (Ngang)</option>
-                <option value="PORTRAIT">3:4 (Dọc)</option>
-              </select>
+          <!-- Step 3: Generate -->
+          <div class="pipeline-step last" id="pstep-generate" data-step="generate">
+            <div class="pstep-left">
+              <div class="pstep-dot" id="pdot-generate"></div>
             </div>
-
-            <!-- Quantity Selection -->
-            <div class="option-field">
-              <label>Số lượng ảnh phối cảnh</label>
-              <select id="livedInQuantity" style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm); color: var(--text); padding: 8px 10px; font-size: 13px; outline: none; font-family: var(--font);">
-                <option value="1" selected>1 ảnh</option>
-                <option value="2">2 ảnh</option>
-                <option value="3">3 ảnh</option>
-                <option value="4">4 ảnh</option>
-              </select>
+            <div class="pstep-body">
+              <div class="pstep-header-row">
+                <span class="pstep-name">Bước 3 — AI Tạo ảnh</span>
+                <span class="pstep-badge" id="pbadge-generate">Chờ</span>
+              </div>
+              <div class="pstep-detail" id="pdetail-generate" style="display:none;">
+                <div class="pstep-time" id="ptime-generate"></div>
+                <button class="pstep-retry-btn" id="pretry-generate" style="display:none;">Chạy lại từ bước này</button>
+              </div>
             </div>
           </div>
-        </section>
-
-        <!-- Action Button -->
-        <div class="action-container">
-          <button class="btn btn-primary" id="btnGenerateLivedIn" disabled>
-            <span class="btn-text">🪄 Tạo Ảnh Sinh Hoạt AI</span>
-            <span class="btn-loading" style="display: none;">
-              <span class="spinner"></span>
-              <span class="loading-status">Đang phân tích không gian phòng...</span>
-            </span>
-          </button>
         </div>
       </div>
+
 
       <!-- Tab 2: Result -->
       <div class="tab-content" id="tab-result">
@@ -495,6 +525,208 @@
         </section>
       </div>
 
+      <!-- ══════════════════════════════════════════════════════
+           Tab: Ảnh Thực - Biến Phòng Nội Thất Thành Ảnh Thực Tế
+      ══════════════════════════════════════════════════════ -->
+      <div class="tab-content" id="tab-lifestyle">
+
+        <!-- Upload -->
+        <section class="card upload-section">
+          <div class="card-header">
+            <div class="step-num">1</div>
+            <h2>Upload ảnh phòng nội thất</h2>
+          </div>
+          <input type="file" id="lsImageInput" accept="image/*" style="display:none;">
+          <div class="upload-area" id="lsUploadArea">
+            <div class="upload-content" id="lsUploadPlaceholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p class="upload-title">Upload ảnh phòng đã thiết kế</p>
+              <p class="upload-subtitle">AI sẽ biến thành ảnh thực tế sinh động</p>
+            </div>
+            <div class="preview-container" id="lsPreviewContainer" style="display:none;">
+              <img id="lsImagePreview" src="" alt="Room preview">
+              <button class="btn-remove-img" id="btnRemoveLsImage" type="button">✕</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stage Selector -->
+        <section class="card type-section">
+          <div class="card-header">
+            <div class="step-num">2</div>
+            <h2>Chọn giai đoạn & Kịch bản</h2>
+          </div>
+
+          <div class="options-group">
+            <div class="option-field">
+              <label class="section-label">🎬 Giai đoạn thực tế</label>
+              <div class="pill-select-group" id="lsStageGroup">
+                <button class="pill-btn active" data-value="delivery">📦 Giao hàng đồ đạc</button>
+                <button class="pill-btn" data-value="construction">🔨 Đang thi công</button>
+                <button class="pill-btn" data-value="lived-in">🏠 Đang sinh hoạt</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL: Delivery -->
+          <div id="lsPanel-delivery" class="ls-panel">
+            <div class="options-group">
+              <div class="option-field">
+                <label class="section-label">📦 Loại hình giao hàng</label>
+                <div class="decor-chip-group" id="lsDeliveryItems">
+                  <label class="decor-chip"><input type="checkbox" value="cardboard-boxes" checked><span>📦 Thùng carton lớn</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="wooden-crates"><span>🪵 Kiện gỗ đóng hòm</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="wrapped-furniture"><span>🎁 Nội thất bọc màng</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="delivery-workers"><span>👷 Thợ giao hàng</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="trolley-cart"><span>🛒 Xe đẩy hàng</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="messy-floor"><span>🗃️ Sàn lộn xộn</span></label>
+                </div>
+              </div>
+              <div class="option-field">
+                <label class="section-label">🌅 Thời điểm</label>
+                <div class="pill-select-group" id="lsDeliveryTime">
+                  <button class="pill-btn active" data-value="morning">☀️ Ban ngày</button>
+                  <button class="pill-btn" data-value="afternoon">🌤️ Chiều muộn</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL: Construction -->
+          <div id="lsPanel-construction" class="ls-panel" style="display:none;">
+            <div class="options-group">
+              <div class="option-field">
+                <label class="section-label">🔨 Công việc thi công</label>
+                <div class="decor-chip-group" id="lsConstructionTasks">
+                  <label class="decor-chip"><input type="checkbox" value="painting" checked><span>🎨 Thợ sơn nhà</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="carpentry"><span>🪚 Thợ đóng tủ / nội thất</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="flooring"><span>🟫 Lát sàn / ốp tường</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="electrical"><span>⚡ Đi điện / đèn chiếu sáng</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="cleaning"><span>🧹 Vệ sinh dọn dẹp</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="measuring"><span>📏 Đo đạc / khảo sát</span></label>
+                </div>
+              </div>
+              <div class="option-field">
+                <label class="section-label">👷 Số thợ trong khung hình</label>
+                <div class="pill-select-group" id="lsWorkerCount">
+                  <button class="pill-btn active" data-value="1">1 thợ</button>
+                  <button class="pill-btn" data-value="2">2 thợ</button>
+                  <button class="pill-btn" data-value="3">3 thợ</button>
+                </div>
+              </div>
+              <div class="option-field">
+                <label class="section-label">🏗️ Mức độ thi công</label>
+                <div class="pill-select-group" id="lsConstructionLevel">
+                  <button class="pill-btn active" data-value="mid">⚙️ Đang thi công</button>
+                  <button class="pill-btn" data-value="almost-done">✅ Gần hoàn thiện</button>
+                  <button class="pill-btn" data-value="just-started">🧱 Mới bắt đầu</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL: Lived-in -->
+          <div id="lsPanel-lived-in" class="ls-panel" style="display:none;">
+            <div class="options-group">
+
+              <div class="option-field">
+                <label class="section-label">👥 Thành phần gia đình</label>
+                <div class="decor-chip-group" id="lsPeopleTypes">
+                  <label class="decor-chip"><input type="checkbox" value="adult-man" checked><span>👨 Đàn ông</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="adult-woman"><span>👩 Phụ nữ</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="elderly-man"><span>👴 Ông lớn tuổi</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="elderly-woman"><span>👵 Bà lớn tuổi</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="boy-child"><span>👦 Bé trai</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="girl-child"><span>👧 Bé gái</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="baby"><span>👶 Em bé</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="dog"><span>🐕 Chó cưng</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="cat"><span>🐈 Mèo cưng</span></label>
+                </div>
+              </div>
+
+              <div class="option-field">
+                <label class="section-label">🎯 Hoạt động đang diễn ra</label>
+                <div class="decor-chip-group" id="lsActivities">
+                  <label class="decor-chip"><input type="checkbox" value="watching-tv" checked><span>📺 Xem TV / thư giãn</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="eating"><span>🍜 Ăn cơm / ăn sáng</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="working-laptop"><span>💻 Làm việc laptop</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="reading"><span>📖 Đọc sách</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="playing-kids"><span>🧸 Trẻ con đang chơi</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="cooking"><span>👨‍🍳 Đang nấu ăn</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="morning-coffee"><span>☕ Uống cà phê sáng</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="video-call"><span>📱 Gọi video / điện thoại</span></label>
+                  <label class="decor-chip"><input type="checkbox" value="yoga"><span>🧘 Tập yoga / thể dục</span></label>
+                </div>
+              </div>
+
+              <div class="option-field">
+                <label class="section-label">🌅 Thời gian trong ngày</label>
+                <div class="pill-select-group" id="lsDayTime">
+                  <button class="pill-btn active" data-value="morning">🌅 Sáng sớm</button>
+                  <button class="pill-btn" data-value="daytime">☀️ Ban ngày</button>
+                  <button class="pill-btn" data-value="evening">🌆 Chiều tối</button>
+                  <button class="pill-btn" data-value="night">🌙 Ban đêm</button>
+                </div>
+              </div>
+
+              <div class="option-field">
+                <label class="section-label">✨ Mức độ chân thực</label>
+                <div class="pill-select-group" id="lsRealism">
+                  <button class="pill-btn active" data-value="candid">📷 Ảnh candid tự nhiên</button>
+                  <button class="pill-btn" data-value="staged">🎬 Dàn cảnh đẹp</button>
+                  <button class="pill-btn" data-value="raw">🏚️ Rất thực tế / lộn xộn</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Output Settings -->
+        <section class="card type-section">
+          <div class="card-header">
+            <div class="step-num">3</div>
+            <h2>Cài đặt đầu ra</h2>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Tỉ lệ ảnh</label>
+              <select id="lsRatio">
+                <option value="ORIGINAL" selected>📐 Giữ nguyên</option>
+                <option value="LANDSCAPE">4:3 Ngang</option>
+                <option value="PORTRAIT">3:4 Dọc</option>
+                <option value="SQUARE">1:1 Vuông</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Số ảnh xuất</label>
+              <select id="lsQuantity">
+                <option value="1" selected>1 ảnh</option>
+                <option value="2">2 ảnh</option>
+                <option value="3">3 ảnh</option>
+                <option value="4">4 ảnh</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <div class="action-container">
+          <button class="btn btn-primary" id="btnGenerateLifestyle" disabled>
+            <span class="btn-text">🎬 Tạo Ảnh Thực Tế AI</span>
+            <span class="btn-loading" style="display:none;">
+              <span class="spinner"></span>
+              <span class="loading-status">AI đang dựng khung cảnh thực tế...</span>
+            </span>
+          </button>
+        </div>
+
+      </div>
+
     </main>
 
     <!-- Footer -->
@@ -505,69 +737,24 @@
     <!-- Bottom Tab Bar Navigation -->
     <div class="pwa-tabbar">
       <button class="tab-item active" data-tab="tab-design">
-        <span class="tab-icon">
-          <svg class="tab-svg" viewBox="0 0 24 24">
-            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.34771 19.4891 5.48523 20.218 5.18731 20.8138L5 21.1885C4.70425 21.78 5.0931 22 5.7533 22H12Z"/>
-            <circle cx="7.5" cy="10.5" r="1" fill="currentColor"/>
-            <circle cx="11.5" cy="7.5" r="1" fill="currentColor"/>
-            <circle cx="16.5" cy="9.5" r="1" fill="currentColor"/>
-            <circle cx="15.5" cy="14.5" r="1" fill="currentColor"/>
-          </svg>
-        </span>
         <span class="tab-label">Thiết kế</span>
       </button>
-      <button class="tab-item" data-tab="tab-lived-in" id="tabLivedInBtn">
-        <span class="tab-icon">
-          <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          </svg>
-        </span>
-        <span class="tab-label">Sinh hoạt</span>
+      <button class="tab-item" data-tab="tab-lifestyle" id="tabLifestyleBtn">
+        <span class="tab-label">Ảnh Thực</span>
       </button>
       <button class="tab-item" data-tab="tab-multi-angle" id="tabMultiAngleBtn">
-        <span class="tab-icon">
-          <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 18V8.2c0-1 .6-1.9 1.5-2.2L12 3l6.5 3c.9.3 1.5 1.2 1.5 2.2V18"/>
-            <path d="M12 21V9"/>
-            <circle cx="12" cy="9" r="2"/>
-          </svg>
-        </span>
         <span class="tab-label">Góc nhìn</span>
       </button>
       <button class="tab-item" data-tab="tab-result" id="tabResultBtn">
-        <span class="tab-icon">
-          <svg class="tab-svg" viewBox="0 0 24 24">
-            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/>
-            <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z"/>
-            <path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z"/>
-          </svg>
-        </span>
         <span class="tab-label">Kết quả</span>
       </button>
       <button class="tab-item" data-tab="tab-history">
-        <span class="tab-icon">
-          <svg class="tab-svg" viewBox="0 0 24 24">
-            <path d="M3 9a2 2 0 0 1 2-2h.93a2 2 0 0 0 1.664-.89l.812-1.22A2 2 0 0 1 10.07 4H19a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <circle cx="12" cy="13" r="3"/>
-            <path d="M12 11.5V13h1.5"/>
-          </svg>
-        </span>
         <span class="tab-label">Lịch sử</span>
       </button>
       <button class="tab-item" data-tab="tab-settings" id="tabSettingsBtn">
-        <span class="tab-icon">
-          <svg class="tab-svg" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
         <span class="tab-label">Cấu hình</span>
       </button>
     </div>
-
-  </div>
 
   <!-- Lightbox -->
   <div class="lightbox" id="lightbox">

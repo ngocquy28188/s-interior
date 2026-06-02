@@ -117,16 +117,24 @@ let selectedStyle = STYLE_PRESETS[0].id;
 let selectedImageFile = null;
 let isGenerating = false;
 
-// Lived-in state variables
-let selectedLivedInSubject = 'nam';
-let selectedLivedInTime = 'sáng';
-let selectedLivedInImageFile = null;
-let isGeneratingLivedIn = false;
+// Render3D (Sketch → 3D) state variables
+let selectedR3dImageFile = null;
+let isGeneratingR3d = false;
+
+// Lifestyle (Real-life) state variables
+let selectedLsImageFile = null;
+let isGeneratingLs = false;
+let selectedLsStage = 'delivery';
+
+// Design mode: 'redesign' | 'keepstyle'
+let designMode = 'redesign';
+
 
 // Initialize app when DOM loads
 window.addEventListener('DOMContentLoaded', () => {
   renderOptions();
   setupEventListeners();
+  initPipelineButtons();
   loadSettings();
   renderHistory();
   initQuotation();
@@ -154,46 +162,46 @@ async function checkPBConnection() {
   }
 }
 
-// Render dynamic selections
+// Render dynamic selections (Pill style)
 function renderOptions() {
-  // Room types
+  // Room types -> pill buttons
   const grid = $('#interiorGrid');
   if (grid) {
-    grid.innerHTML = INTERIOR_TYPES.map(t => `
-      <div class="curtain-card ${t.id === selectedInteriorType ? 'active' : ''}" data-id="${t.id}">
-        <div class="preset-icon-container">
-          ${t.icon}
-        </div>
-        <div class="preset-card-title">${t.name}</div>
-      </div>
-    `).join('');
+    const roomIcons = {
+      living: '🛋️', bedroom: '🛌', kitchen: '🍳',
+      bathroom: '🛁', office: '💻', balcony: '🌿'
+    };
+    grid.innerHTML = INTERIOR_TYPES.map(t =>
+      `<button class="pill-btn ${t.id === selectedInteriorType ? 'active' : ''}" data-id="${t.id}">${roomIcons[t.id] || '🟨'} ${t.name}</button>`
+    ).join('');
   }
 
-  // Color Presets
+  // Color Presets -> pill buttons
   const palette = $('#colorPalette');
   if (palette) {
-    palette.innerHTML = COLOR_PRESETS.map(c => `
-      <div class="color-item ${c.id === selectedColor ? 'active' : ''}" data-id="${c.id}">
-        <div class="preset-icon-container">
-          ${c.icon}
-          ${c.id !== 'custom' ? `<span class="color-dot-mini" style="background: ${getColorPreviewBackground(c.id)};"></span>` : ''}
-        </div>
-        <div class="preset-card-title">${c.name}</div>
-      </div>
-    `).join('');
+    const colorDots = {
+      'cream-wood': '#d2b48c', 'walnut-stone': '#4b3621',
+      'luxury-gold': '#d4af37', 'industrial-gray': '#666',
+      'minimal-white': '#ddd', 'custom': '#888'
+    };
+    palette.innerHTML = COLOR_PRESETS.map(c => {
+      const dot = colorDots[c.id]
+        ? `<span style="width:8px;height:8px;border-radius:50%;background:${colorDots[c.id]};display:inline-block;margin-right:2px;flex-shrink:0;"></span>`
+        : '';
+      return `<button class="pill-btn ${c.id === selectedColor ? 'active' : ''}" data-id="${c.id}">${dot}${c.name}</button>`;
+    }).join('');
   }
 
-  // Styles
+  // Styles -> pill buttons
   const styleContainer = $('#styleOptions');
   if (styleContainer) {
-    styleContainer.innerHTML = STYLE_PRESETS.map(s => `
-      <div class="install-item ${s.id === selectedStyle ? 'active' : ''}" data-id="${s.id}">
-        <div class="preset-icon-container">
-          ${s.icon}
-        </div>
-        <div class="preset-card-title">${s.name}</div>
-      </div>
-    `).join('');
+    const styleIcons = {
+      modern: '⬛', luxury: '💎', scandinavian: '🌿',
+      indochine: '🏮', japandi: '⚫'
+    };
+    styleContainer.innerHTML = STYLE_PRESETS.map(s =>
+      `<button class="pill-btn ${s.id === selectedStyle ? 'active' : ''}" data-id="${s.id}">${styleIcons[s.id] || '✨'} ${s.name}</button>`
+    ).join('');
   }
 }
 
@@ -219,88 +227,47 @@ function setupEventListeners() {
     });
   });
 
-  // Lived-in selection handlers
-  $('#livedInSubjectOptions')?.addEventListener('click', e => {
-    const item = e.target.closest('.install-item');
-    if (!item) return;
-    selectedLivedInSubject = item.dataset.value;
-    $$('#livedInSubjectOptions .install-item').forEach(c => c.classList.remove('active'));
-    item.classList.add('active');
+  // Design Mode Toggle
+  $('#designModeGroup')?.addEventListener('click', e => {
+    const btn = e.target.closest('.mode-btn');
+    if (!btn) return;
+    designMode = btn.dataset.mode;
+    $$('#designModeGroup .mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // Show/hide panels
+    $('#panelRedesign').style.display  = designMode === 'redesign'   ? 'flex' : 'none';
+    $('#panelKeepStyle').style.display = designMode === 'keepstyle'  ? 'flex' : 'none';
+    // Update button label
+    const txt = $('#btnGenerateText');
+    if (txt) txt.textContent = designMode === 'keepstyle' ? '✨ Thêm Trang Trí AI' : '🪄 Thiết Kế Nội Thất AI';
     validateForm();
   });
 
-  $('#livedInTimeOptions')?.addEventListener('click', e => {
-    const item = e.target.closest('.install-item');
-    if (!item) return;
-    selectedLivedInTime = item.dataset.value;
-    $$('#livedInTimeOptions .install-item').forEach(c => c.classList.remove('active'));
-    item.classList.add('active');
-    validateForm();
+  // r3dOutputMode pill handler
+  $('#r3dOutputMode')?.addEventListener('click', e => {
+    const btn = e.target.closest('.pill-btn');
+    if (!btn) return;
+    $$('#r3dOutputMode .pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
   });
 
-  // Lived-in File Upload
-  const livedInUploadArea = $('#livedInUploadArea');
-  const livedInFileInput = $('#livedInImageInput');
-
-  livedInUploadArea?.addEventListener('click', () => {
-    if (!selectedLivedInImageFile) livedInFileInput.click();
-  });
-
-  livedInFileInput?.addEventListener('change', e => {
-    if (e.target.files.length > 0) {
-      handleLivedInImageSelection(e.target.files[0]);
-    }
-  });
-
-  // Drag and Drop for Lived-in
-  livedInUploadArea?.addEventListener('dragover', e => {
-    e.preventDefault();
-    livedInUploadArea.style.borderColor = 'var(--primary-gold)';
-  });
-
-  livedInUploadArea?.addEventListener('dragleave', () => {
-    livedInUploadArea.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-  });
-
-  livedInUploadArea?.addEventListener('drop', e => {
-    e.preventDefault();
-    livedInUploadArea.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-    if (e.dataTransfer.files.length > 0) {
-      handleLivedInImageSelection(e.dataTransfer.files[0]);
-    }
-  });
-
-  // Remove Lived-in image
-  $('#btnRemoveLivedInImage')?.addEventListener('click', e => {
-    e.stopPropagation();
-    selectedLivedInImageFile = null;
-    $('#livedInImageInput').value = '';
-    $('#livedInPreviewContainer').style.display = 'none';
-    $('#livedInUploadPlaceholder').style.display = 'flex';
-    validateForm();
-  });
-
-  // Lived-in Generate Action
-  $('#btnGenerateLivedIn')?.addEventListener('click', startLivedInGeneration);
-
-  // Grid / selection handlers
+  // Pill selection handlers for interiorGrid
   $('#interiorGrid')?.addEventListener('click', e => {
-    const card = e.target.closest('.curtain-card');
-    if (!card) return;
-    selectedInteriorType = card.dataset.id;
-    $$('#interiorGrid .curtain-card').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
+    const btn = e.target.closest('.pill-btn');
+    if (!btn) return;
+    selectedInteriorType = btn.dataset.id;
+    $$('#interiorGrid .pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     validateForm();
   });
 
+  // Pill selection for colorPalette
   $('#colorPalette')?.addEventListener('click', e => {
-    const item = e.target.closest('.color-item');
-    if (!item) return;
-    selectedColor = item.dataset.id;
-    $$('#colorPalette .color-item').forEach(c => c.classList.remove('active'));
-    item.classList.add('active');
-    
-    // Toggle custom color input visibility
+    const btn = e.target.closest('.pill-btn');
+    if (!btn) return;
+    selectedColor = btn.dataset.id;
+    $$('#colorPalette .pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     const customWrap = $('.custom-color-wrap');
     if (selectedColor === 'custom') {
       customWrap.style.display = 'block';
@@ -311,14 +278,72 @@ function setupEventListeners() {
     validateForm();
   });
 
+  // Pill selection for styleOptions
   $('#styleOptions')?.addEventListener('click', e => {
-    const item = e.target.closest('.install-item');
-    if (!item) return;
-    selectedStyle = item.dataset.id;
-    $$('#styleOptions .install-item').forEach(c => c.classList.remove('active'));
-    item.classList.add('active');
+    const btn = e.target.closest('.pill-btn');
+    if (!btn) return;
+    selectedStyle = btn.dataset.id;
+    $$('#styleOptions .pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     validateForm();
   });
+
+  // Render3D pill selections
+  $('#r3dOutputMode')?.addEventListener('click', e => {
+    const btn = e.target.closest('.pill-btn');
+    if (!btn) return;
+    $$('#r3dOutputMode .pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+
+  $('#r3dStyleMode')?.addEventListener('click', e => {
+    const btn = e.target.closest('.pill-btn');
+    if (!btn) return;
+    $$('#r3dStyleMode .pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+
+  // Render3D File Upload
+  const r3dUploadArea = $('#r3dUploadArea');
+  const r3dFileInput = $('#r3dImageInput');
+
+  r3dUploadArea?.addEventListener('click', () => {
+    if (!selectedR3dImageFile) r3dFileInput.click();
+  });
+
+  r3dFileInput?.addEventListener('change', e => {
+    if (e.target.files.length > 0) handleR3dImageSelection(e.target.files[0]);
+  });
+
+  r3dUploadArea?.addEventListener('dragover', e => {
+    e.preventDefault();
+    r3dUploadArea.style.borderColor = 'var(--primary-gold)';
+  });
+
+  r3dUploadArea?.addEventListener('dragleave', () => {
+    r3dUploadArea.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+  });
+
+  r3dUploadArea?.addEventListener('drop', e => {
+    e.preventDefault();
+    r3dUploadArea.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+    if (e.dataTransfer.files.length > 0) handleR3dImageSelection(e.dataTransfer.files[0]);
+  });
+
+  $('#btnRemoveR3dImage')?.addEventListener('click', e => {
+    e.stopPropagation();
+    selectedR3dImageFile = null;
+    $('#r3dImageInput').value = '';
+    $('#r3dPreviewContainer').style.display = 'none';
+    $('#r3dUploadPlaceholder').style.display = 'flex';
+    validateForm();
+  });
+
+  // Render3D Generate Action
+  $('#btnGenerateR3d')?.addEventListener('click', startRender3dGeneration);
+
+  // Lived-in Generate Action (kept if still referenced)
+  $('#btnGenerateLivedIn')?.addEventListener('click', () => toast('Tab này đã được thay bằng Render 3D.', 'info'));
 
   // File Upload
   const uploadArea = $('#uploadArea');
@@ -375,8 +400,10 @@ function setupEventListeners() {
     }
   });
 
-  // Generate Action
-  $('#btnGenerate')?.addEventListener('click', startInteriorGeneration);
+  // Generate Action — routes via pipeline engine
+  $('#btnGenerate')?.addEventListener('click', () => {
+    runPipeline();
+  });
 
   // Reuse generated image as input
   $('#btnReuseAsInput')?.addEventListener('click', async () => {
@@ -468,6 +495,63 @@ function setupEventListeners() {
 
     maGenerateBtn.addEventListener('click', startMultiAngleAnalysis);
   }
+
+  // ── Lifestyle Tab ──────────────────────────────
+
+  // Stage switcher
+  $('#lsStageGroup')?.addEventListener('click', e => {
+    const btn = e.target.closest('.pill-btn');
+    if (!btn) return;
+    selectedLsStage = btn.dataset.value;
+    $$('#lsStageGroup .pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // Show/hide panels
+    $$('.ls-panel').forEach(p => p.style.display = 'none');
+    const panel = $(`#lsPanel-${selectedLsStage}`);
+    if (panel) panel.style.display = 'block';
+  });
+
+  // Pill group handlers inside panels
+  ['lsDeliveryTime','lsWorkerCount','lsConstructionLevel','lsDayTime','lsRealism'].forEach(groupId => {
+    $(`#${groupId}`)?.addEventListener('click', e => {
+      const btn = e.target.closest('.pill-btn');
+      if (!btn) return;
+      $$(`#${groupId} .pill-btn`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Upload
+  const lsUploadArea = $('#lsUploadArea');
+  const lsFileInput  = $('#lsImageInput');
+
+  lsUploadArea?.addEventListener('click', () => {
+    if (!selectedLsImageFile) lsFileInput.click();
+  });
+  lsFileInput?.addEventListener('change', e => {
+    if (e.target.files.length > 0) handleLsImageSelection(e.target.files[0]);
+  });
+  lsUploadArea?.addEventListener('dragover', e => {
+    e.preventDefault();
+    lsUploadArea.style.borderColor = 'var(--primary-gold)';
+  });
+  lsUploadArea?.addEventListener('dragleave', () => {
+    lsUploadArea.style.borderColor = 'rgba(255,255,255,0.15)';
+  });
+  lsUploadArea?.addEventListener('drop', e => {
+    e.preventDefault();
+    lsUploadArea.style.borderColor = 'rgba(255,255,255,0.15)';
+    if (e.dataTransfer.files.length > 0) handleLsImageSelection(e.dataTransfer.files[0]);
+  });
+  $('#btnRemoveLsImage')?.addEventListener('click', e => {
+    e.stopPropagation();
+    selectedLsImageFile = null;
+    $('#lsImageInput').value = '';
+    $('#lsPreviewContainer').style.display = 'none';
+    $('#lsUploadPlaceholder').style.display = 'flex';
+    validateForm();
+  });
+  $('#btnGenerateLifestyle')?.addEventListener('click', startLifestyleGeneration);
 }
 
 // Handle selected image file
@@ -493,25 +577,29 @@ function validateForm() {
   const btn = $('#btnGenerate');
   if (btn) {
     const hasImage = !!selectedImageFile;
-    const isCustomColorValid = selectedColor !== 'custom' || $('#customColor').value.trim().length > 0;
-    
-    if (hasImage && isCustomColorValid && !isGenerating) {
-      btn.removeAttribute('disabled');
+    const busy = isGenerating || isGeneratingR3d;
+
+    // keepstyle mode: just need an image
+    // redesign mode: need image + valid color
+    let ready;
+    if (designMode === 'keepstyle') {
+      ready = hasImage && !busy;
     } else {
-      btn.setAttribute('disabled', 'true');
+      const isCustomColorValid = selectedColor !== 'custom' || ($('#customColor')?.value.trim().length > 0);
+      ready = hasImage && isCustomColorValid && !busy;
     }
+
+    if (ready) btn.removeAttribute('disabled');
+    else        btn.setAttribute('disabled', 'true');
   }
 
-  const livedInBtn = $('#btnGenerateLivedIn');
-  if (livedInBtn) {
-    const hasLivedInImage = !!selectedLivedInImageFile;
-    if (hasLivedInImage && !isGeneratingLivedIn) {
-      livedInBtn.removeAttribute('disabled');
-    } else {
-      livedInBtn.setAttribute('disabled', 'true');
-    }
+  const lsBtn = $('#btnGenerateLifestyle');
+  if (lsBtn) {
+    if (selectedLsImageFile && !isGeneratingLs) lsBtn.removeAttribute('disabled');
+    else lsBtn.setAttribute('disabled', 'true');
   }
 }
+
 
 // Helper to detect closest aspect ratio from a file
 async function getImageClosestRatio(file) {
@@ -730,22 +818,426 @@ async function startInteriorGeneration() {
   }
 }
 
-// Lived-in Image selection
-function handleLivedInImageSelection(file) {
+// Render3D Image selection
+function handleR3dImageSelection(file) {
   if (!file.type.startsWith('image/')) {
     toast('❌ Vui lòng chọn file hình ảnh hợp lệ.', 'error');
     return;
   }
-  selectedLivedInImageFile = file;
-
+  selectedR3dImageFile = file;
   const reader = new FileReader();
   reader.onload = e => {
-    $('#livedInImagePreview').src = e.target.result;
-    $('#livedInUploadPlaceholder').style.display = 'none';
-    $('#livedInPreviewContainer').style.display = 'block';
+    $('#r3dImagePreview').src = e.target.result;
+    $('#r3dUploadPlaceholder').style.display = 'none';
+    $('#r3dPreviewContainer').style.display = 'block';
     validateForm();
   };
   reader.readAsDataURL(file);
+}
+
+// ── Lifestyle Image Handler ────────────────────────────
+function handleLsImageSelection(file) {
+  if (!file.type.startsWith('image/')) {
+    toast('❌ Vui lòng chọn file hình ảnh hợp lệ.', 'error');
+    return;
+  }
+  selectedLsImageFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    $('#lsImagePreview').src = e.target.result;
+    $('#lsUploadPlaceholder').style.display = 'none';
+    $('#lsPreviewContainer').style.display = 'block';
+    validateForm();
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Lifestyle Generation Pipeline ─────────────────────
+async function startLifestyleGeneration() {
+  if (isGeneratingLs || !selectedLsImageFile) return;
+
+  isGeneratingLs = true;
+  validateForm();
+  toggleLoadingState(true, 'Đang phân tích kịch bản...');
+
+  let intervalId;
+
+  try {
+    // ── Collect all options based on active stage ──
+    const stage = selectedLsStage;
+    const getChecked = id => [...$$(`#${id} input[type="checkbox"]:checked`)].map(el => el.value);
+    const getActivePill = id => $(`#${id} .pill-btn.active`)?.dataset.value || '';
+
+    let sceneDescription = '';
+
+    if (stage === 'delivery') {
+      const items = getChecked('lsDeliveryItems');
+      const time   = getActivePill('lsDeliveryTime');
+
+      const itemLabels = {
+        'cardboard-boxes':  'large cardboard delivery boxes scattered around the room',
+        'wooden-crates':    'wooden crates and packing crates stacked against walls',
+        'wrapped-furniture':'furniture pieces wrapped in protective stretch film and bubble wrap',
+        'delivery-workers': '1-2 delivery workers in uniforms carrying and arranging items',
+        'trolley-cart':     'a hand trolley/dolly cart loaded with boxes',
+        'messy-floor':      'floor covered with packaging foam, plastic wrap and packing materials'
+      };
+      const timeLabels = {
+        'morning':   'bright natural daylight streaming through windows',
+        'afternoon': 'warm late-afternoon golden light'
+      };
+
+      sceneDescription = `DELIVERY SCENE: A real candid documentary photo of a brand-new interior room during furniture delivery. The room is filled with: ${items.map(k => itemLabels[k] || k).join('; ')}. Lighting: ${timeLabels[time] || 'natural daylight'}. The atmosphere is busy and realistic — the room is not staged, items are mid-delivery, slightly chaotic but exciting. The completed furniture and design can be seen partially unpacked, hinting at the final look.`;
+
+    } else if (stage === 'construction') {
+      const tasks  = getChecked('lsConstructionTasks');
+      const workers = getActivePill('lsWorkerCount');
+      const level   = getActivePill('lsConstructionLevel');
+
+      const taskLabels = {
+        'painting':    'workers in overalls painting walls with rollers and brushes',
+        'carpentry':   'a carpenter installing custom wooden cabinets and furniture',
+        'flooring':    'workers laying floor tiles or wood flooring',
+        'electrical':  'an electrician installing light fixtures and running cables',
+        'cleaning':    'workers doing final cleaning with mops and vacuum cleaners',
+        'measuring':   'workers measuring walls and marking positions with tape measures and pencils'
+      };
+      const levelLabels = {
+        'just-started': 'The room is at the very beginning of construction — bare walls, tools being set up, materials just arriving.',
+        'mid':          'The room is mid-construction — scaffolding, tools, materials everywhere, work actively in progress.',
+        'almost-done':  'The room is nearly complete — most work is done, only final finishing touches remain, the space is taking its beautiful final shape.'
+      };
+
+      sceneDescription = `CONSTRUCTION SCENE: A candid, documentary-style photo of the interior during renovation. ${levelLabels[level] || ''} ${workers} Vietnamese construction worker(s) are actively working. Visible tasks: ${tasks.map(k => taskLabels[k] || k).join('; ')}. There are construction tools, material bags, ladders, and protective tarps visible. The overall atmosphere is authentic and captures the transformation of this space in progress.`;
+
+    } else if (stage === 'lived-in') {
+      const people     = getChecked('lsPeopleTypes');
+      const activities = getChecked('lsActivities');
+      const timeOfDay  = getActivePill('lsDayTime');
+      const realism    = getActivePill('lsRealism');
+
+      const peopleLabels = {
+        'adult-man':     'adult Vietnamese man',
+        'adult-woman':   'adult Vietnamese woman',
+        'elderly-man':   'elderly Vietnamese grandfather',
+        'elderly-woman': 'elderly Vietnamese grandmother',
+        'boy-child':     'young Vietnamese boy (age 6-10)',
+        'girl-child':    'young Vietnamese girl (age 6-10)',
+        'baby':          'a Vietnamese baby or toddler',
+        'dog':           'a pet dog',
+        'cat':           'a pet cat'
+      };
+      const activityLabels = {
+        'watching-tv':    'relaxing and watching TV together on the sofa',
+        'eating':         'eating a meal at the dining table',
+        'working-laptop': 'working on a laptop',
+        'reading':        'reading a book or newspaper',
+        'playing-kids':   'children playing with toys on the floor',
+        'cooking':        'cooking in the kitchen',
+        'morning-coffee': 'drinking morning coffee',
+        'video-call':     'having a video call on the phone',
+        'yoga':           'doing yoga or light exercise'
+      };
+      const timeLabels = {
+        'morning':  'early morning soft golden light, warm sunrise atmosphere',
+        'daytime':  'bright natural daylight, clear and vibrant atmosphere',
+        'evening':  'warm amber dusk light filtering through windows, cozy evening glow',
+        'night':    'nighttime with warm indoor artificial lighting, lamps on, cozy and intimate'
+      };
+      const realismLabels = {
+        'candid': 'candid, natural, unposed — people are not aware of the camera, spontaneous real-life moment',
+        'staged': 'beautifully composed, editorial lifestyle photography style, people look relaxed and naturally photogenic',
+        'raw':    'very realistic and raw — slight clutter, everyday items like water bottles, remote controls, slippers on floor, authentic Vietnamese daily life with visible electrical sockets and plugs on walls'
+      };
+
+      const peopleDesc = people.length > 0
+        ? people.map(k => peopleLabels[k] || k).join(', ')
+        : 'a Vietnamese family member';
+      const activityDesc = activities.length > 0
+        ? activities.map(k => activityLabels[k] || k).join(' and ')
+        : 'relaxing at home';
+
+      sceneDescription = `LIVED-IN SCENE: A ${realismLabels[realism] || 'candid'} photo of this interior being lived in. People present: ${peopleDesc}. They are ${activityDesc}. Time of day: ${timeLabels[timeOfDay] || 'daytime'}. CRITICAL: People must have authentic Vietnamese appearance — natural local features, NOT generic AI-generated model faces or Western-looking people. The scene must feel like a real Vietnamese home.`;
+    }
+
+    // ── Build and send prompt ──
+    const formData = new FormData();
+    formData.append('image', selectedLsImageFile);
+    formData.append('stage', stage);
+    formData.append('sceneDescription', sceneDescription);
+
+    const promptRes = await fetch(`${window.API || ''}/api/lifestyle-prompt`, { method: 'POST', body: formData });
+    const promptData = await promptRes.json();
+    if (promptData.error) throw new Error(promptData.error);
+    const finalPrompt = promptData.prompt;
+    $('#resultPrompt').value = finalPrompt;
+
+    toggleLoadingState(true, 'Đang tải ảnh lên máy chủ...');
+
+    const uploadFormData = new FormData();
+    uploadFormData.append('image', selectedLsImageFile);
+    const uploadRes  = await fetch(`${window.API || ''}/api/upload-image`, { method: 'POST', body: uploadFormData });
+    const uploadData = await uploadRes.json();
+    if (uploadData.error) throw new Error(uploadData.error);
+    const mediaId = uploadData.media?.name;
+    if (!mediaId) throw new Error('Không thể upload ảnh gốc lên Cloud.');
+
+    toggleLoadingState(true, 'AI đang dựng khung cảnh thực tế...');
+
+    const outputRatioVal = $('#lsRatio').value;
+    const quantity = parseInt($('#lsQuantity')?.value) || 1;
+    let outputRatio = outputRatioVal;
+    if (outputRatioVal === 'ORIGINAL') outputRatio = await getImageClosestRatio(selectedLsImageFile);
+
+    const taskPromises = [];
+    for (let q = 0; q < quantity; q++) {
+      taskPromises.push((async () => {
+        const taskRes = await fetch(`${window.API || ''}/api/image-to-image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: finalPrompt, quantity: 1, ratio: outputRatio, model: 'Nano_Banana_Pro', mediaId })
+        });
+        const taskData = await taskRes.json();
+        if (taskData.error) throw new Error(taskData.error);
+        const taskId = taskData.taskid || taskData.taskId;
+        if (!taskId) throw new Error('Không nhận được mã tiến trình.');
+        return taskId;
+      })());
+    }
+
+    const taskIds = await Promise.all(taskPromises);
+    let elapsed = 0;
+    intervalId = setInterval(() => {
+      elapsed += 5;
+      toggleLoadingState(true, `AI đang dựng khung cảnh thực tế... (${elapsed}s)`);
+    }, 5000);
+
+    const pollResults = await Promise.all(taskIds.map(id => pollGenerationStatus(id, () => {}, 60)));
+    clearInterval(intervalId);
+
+    const results = [];
+    pollResults.forEach(r => { if (r.result?.length > 0) results.push(...r.result); });
+    if (results.length === 0) throw new Error('Lỗi đồng bộ kết quả từ server.');
+
+    const resultImageWrapper = $('#resultImageWrapper');
+    const resultGridWrapper  = $('#resultGridWrapper');
+
+    if (quantity === 1) {
+      const proxyUrl = `${window.API || ''}/api/proxy-image?url=${encodeURIComponent(results[0]?.fifeUrl)}`;
+      $('#resultImage').src = proxyUrl;
+      $('#btnDownload').href = proxyUrl;
+      $('#resultImage').onclick = () => openLightbox(proxyUrl);
+      if (resultImageWrapper) resultImageWrapper.style.display = 'block';
+      if (resultGridWrapper)  resultGridWrapper.style.display  = 'none';
+      saveToHistory(proxyUrl, finalPrompt);
+    } else {
+      if (resultImageWrapper) resultImageWrapper.style.display = 'none';
+      if (resultGridWrapper) {
+        resultGridWrapper.innerHTML = '';
+        resultGridWrapper.style.display = 'grid';
+        results.forEach(item => {
+          const proxyUrl = `${window.API || ''}/api/proxy-image?url=${encodeURIComponent(item.fifeUrl)}`;
+          const img = document.createElement('img');
+          img.src = proxyUrl;
+          img.alt = 'Ảnh thực tế';
+          img.style.cssText = 'width:100%;border-radius:var(--radius-md);cursor:pointer;border:1px solid rgba(255,255,255,0.08);transition:transform 0.2s,border-color 0.2s;';
+          img.onmouseenter = () => { img.style.transform = 'scale(1.02)'; img.style.borderColor = 'var(--primary-gold)'; };
+          img.onmouseleave = () => { img.style.transform = ''; img.style.borderColor = 'rgba(255,255,255,0.08)'; };
+          img.onclick = () => openLightbox(proxyUrl);
+          resultGridWrapper.appendChild(img);
+          saveToHistory(proxyUrl, finalPrompt);
+        });
+        if (results[0]?.fifeUrl) $('#btnDownload').href = `${window.API || ''}/api/proxy-image?url=${encodeURIComponent(results[0].fifeUrl)}`;
+      }
+    }
+
+    const placeholder = $('#resultPlaceholder');
+    if (placeholder) placeholder.style.display = 'none';
+    $('#resultSection').style.display = 'block';
+    switchTab('tab-result');
+
+    const stageEmojis = { delivery: '📦', construction: '🔨', 'lived-in': '🏠' };
+    toast(`🎉 ${stageEmojis[stage] || '✅'} Tạo ảnh thực tế thành công!`, 'success');
+
+  } catch (err) {
+    if (intervalId) clearInterval(intervalId);
+    console.error(err);
+    toast(`❌ Lỗi: ${err.message}`, 'error');
+  } finally {
+    isGeneratingLs = false;
+    toggleLoadingState(false);
+    validateForm();
+  }
+}
+
+// ── Render 3D Generation Pipeline ─────────────────────
+
+async function startRender3dGeneration() {
+  if (isGeneratingR3d || !selectedR3dImageFile) return;
+
+  isGeneratingR3d = true;
+  validateForm();
+  toggleLoadingState(true, 'Đang phân tích phác thảo...', false, 'r3d');
+
+  let intervalId;
+
+  try {
+    // Collect selected options
+    const outputMode = $('#r3dOutputMode .pill-btn.active')?.dataset.value || '3d-photorealistic';
+    const spaceStyle = $('#r3dStyleMode .pill-btn.active')?.dataset.value || 'modern';
+
+    const outputModeLabels = {
+      '3d-photorealistic': 'photorealistic 3D rendering with realistic textures and natural lighting',
+      '3d-render': 'CGI architectural visualization render with dramatic cinematic lighting',
+      '3d-sketch': '3D sketch-based conceptual render with artistic line work and light shading',
+      '3d-night': 'nighttime 3D interior render with warm ambient lighting and moody atmosphere'
+    };
+    const styleLabels = {
+      modern: 'Modern minimalist', luxury: 'Luxury high-end', minimal: 'Ultra minimalist',
+      scandinavian: 'Scandinavian hygge', indochine: 'Indochine vintage'
+    };
+
+    // Collect all checked decorations
+    const getChecked = (groupId) =>
+      [...$$(`#${groupId} input[type="checkbox"]:checked`)].map(el => el.value);
+
+    const decorLighting = getChecked('decorLighting');
+    const decorSoft = getChecked('decorSoft');
+    const decorWall = getChecked('decorWall');
+    const allDecor = [...decorLighting, ...decorSoft, ...decorWall];
+
+    const decorLabels = {
+      'led-ceiling-cove': 'cove LED ceiling wash lighting (indirect warm glow)',
+      'led-cabinet': 'LED under-cabinet accent lighting',
+      'pendant-light': 'decorative pendant light fixture',
+      'floor-lamp': 'stylish floor standing lamp',
+      'strip-led': 'colorful LED strip accent lighting',
+      'cushions': 'decorative cushions and throw pillows on sofa',
+      'throw-blanket': 'cozy throw blanket draped over furniture',
+      'rug': 'area rug on floor',
+      'curtains': 'elegant window curtains',
+      'wall-art': 'framed wall art paintings',
+      'wall-mirror': 'decorative wall mirror',
+      'plant-indoor': 'lush indoor plants and greenery',
+      'bookshelf-decor': 'styled decorative shelf with books and objects',
+      'vase-flowers': 'fresh flower vase centerpiece'
+    };
+    const decorText = allDecor.length > 0
+      ? allDecor.map(k => decorLabels[k] || k).join(', ')
+      : 'no additional decorations';
+
+    // Build prompt via API
+    const formData = new FormData();
+    formData.append('image', selectedR3dImageFile);
+    formData.append('outputMode', outputModeLabels[outputMode] || outputModeLabels['3d-photorealistic']);
+    formData.append('spaceStyle', styleLabels[spaceStyle] || 'Modern minimalist');
+    formData.append('decorItems', decorText);
+
+    const promptRes = await fetch(`${window.API || ''}/api/render3d-prompt`, { method: 'POST', body: formData });
+    const promptData = await promptRes.json();
+    if (promptData.error) throw new Error(promptData.error);
+    const finalPrompt = promptData.prompt;
+    $('#resultPrompt').value = finalPrompt;
+
+    toggleLoadingState(true, 'Đang tải ảnh lên máy chủ...');
+
+    // Upload source image
+    const uploadFormData = new FormData();
+    uploadFormData.append('image', selectedR3dImageFile);
+    const uploadRes = await fetch(`${window.API || ''}/api/upload-image`, { method: 'POST', body: uploadFormData });
+    const uploadData = await uploadRes.json();
+    if (uploadData.error) throw new Error(uploadData.error);
+    const mediaId = uploadData.media?.name;
+    if (!mediaId) throw new Error('Không thể upload ảnh gốc lên Cloud.');
+
+    toggleLoadingState(true, 'AI đang dựng phối cảnh 3D...');
+
+    const outputRatioVal = $('#r3dRatio').value;
+    const quantity = parseInt($('#r3dQuantity')?.value) || 1;
+    let outputRatio = outputRatioVal;
+    if (outputRatioVal === 'ORIGINAL') {
+      outputRatio = await getImageClosestRatio(selectedR3dImageFile);
+    }
+
+    const taskPromises = [];
+    for (let q = 0; q < quantity; q++) {
+      taskPromises.push((async () => {
+        const taskRes = await fetch(`${window.API || ''}/api/image-to-image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: finalPrompt, quantity: 1, ratio: outputRatio, model: 'Nano_Banana_Pro', mediaId })
+        });
+        const taskData = await taskRes.json();
+        if (taskData.error) throw new Error(taskData.error);
+        const taskId = taskData.taskid || taskData.taskId;
+        if (!taskId) throw new Error('Không nhận được mã tiến trình.');
+        return taskId;
+      })());
+    }
+
+    const taskIds = await Promise.all(taskPromises);
+    let elapsedSeconds = 0;
+    intervalId = setInterval(() => {
+      elapsedSeconds += 5;
+      toggleLoadingState(true, `AI đang dựng phối cảnh 3D... (${elapsedSeconds}s)`);
+    }, 5000);
+
+    const pollResults = await Promise.all(taskIds.map(id => pollGenerationStatus(id, () => {}, 60)));
+    clearInterval(intervalId);
+
+    const results = [];
+    pollResults.forEach(r => { if (r.result?.length > 0) results.push(...r.result); });
+    if (results.length === 0) throw new Error('Lỗi đồng bộ kết quả từ server.');
+
+    const resultImageWrapper = $('#resultImageWrapper');
+    const resultGridWrapper = $('#resultGridWrapper');
+
+    if (quantity === 1) {
+      const resultUrl = results[0]?.fifeUrl;
+      if (!resultUrl) throw new Error('Không tìm thấy link ảnh kết quả.');
+      const proxyUrl = `${window.API || ''}/api/proxy-image?url=${encodeURIComponent(resultUrl)}`;
+      $('#resultImage').src = proxyUrl;
+      $('#btnDownload').href = proxyUrl;
+      $('#resultImage').onclick = () => openLightbox(proxyUrl);
+      if (resultImageWrapper) resultImageWrapper.style.display = 'block';
+      if (resultGridWrapper) resultGridWrapper.style.display = 'none';
+      saveToHistory(proxyUrl, finalPrompt);
+    } else {
+      if (resultImageWrapper) resultImageWrapper.style.display = 'none';
+      if (resultGridWrapper) {
+        resultGridWrapper.innerHTML = '';
+        resultGridWrapper.style.display = 'grid';
+        results.forEach(item => {
+          const proxyUrl = `${window.API || ''}/api/proxy-image?url=${encodeURIComponent(item.fifeUrl)}`;
+          const img = document.createElement('img');
+          img.src = proxyUrl;
+          img.alt = 'Phối cảnh 3D';
+          img.style.cssText = 'width:100%;border-radius:var(--radius-md);cursor:pointer;border:1px solid rgba(255,255,255,0.08);transition:transform 0.2s,border-color 0.2s;';
+          img.onmouseenter = () => { img.style.transform = 'scale(1.02)'; img.style.borderColor = 'var(--primary-gold)'; };
+          img.onmouseleave = () => { img.style.transform = ''; img.style.borderColor = 'rgba(255,255,255,0.08)'; };
+          img.onclick = () => openLightbox(proxyUrl);
+          resultGridWrapper.appendChild(img);
+          saveToHistory(proxyUrl, finalPrompt);
+        });
+      }
+      if (results[0]?.fifeUrl) $('#btnDownload').href = `${window.API || ''}/api/proxy-image?url=${encodeURIComponent(results[0].fifeUrl)}`;
+    }
+
+    const resultPlaceholder = $('#resultPlaceholder');
+    if (resultPlaceholder) resultPlaceholder.style.display = 'none';
+    $('#resultSection').style.display = 'block';
+    switchTab('tab-result');
+    toast('🎉 Dựng phối cảnh 3D thành công!', 'success');
+
+  } catch (err) {
+    if (intervalId) clearInterval(intervalId);
+    console.error(err);
+    toast(`❌ Lỗi: ${err.message}`, 'error');
+  } finally {
+    isGeneratingR3d = false;
+    toggleLoadingState(false);
+    validateForm();
+  }
 }
 
 // AI Lived-in Reality Generation pipeline
@@ -2336,3 +2828,283 @@ function setMaBtnLoading(btn, isLoading) {
   if (ldg) ldg.style.display = isLoading ? 'inline-block' : 'none';
 }
 
+
+// ══════════════════════════════════════════════════
+// PIPELINE PROGRESS ENGINE
+// ══════════════════════════════════════════════════
+
+// Cached pipeline state (survives re-runs)
+let pipelineCache = {
+  prompt:  null,  // { text, elapsed }
+  mediaId: null,  // { id, elapsed }
+};
+
+// Step states: 'idle' | 'running' | 'done' | 'error'
+function pipelineSetStep(step, state, timeMs, extra) {
+  const dot    = $(`#pdot-${step}`);
+  const badge  = $(`#pbadge-${step}`);
+  const detail = $(`#pdetail-${step}`);
+  const time   = $(`#ptime-${step}`);
+  const retry  = $(`#pretry-${step}`);
+
+  if (!dot) return;
+
+  // Dot
+  dot.className = `pstep-dot ${state === 'idle' ? '' : state}`;
+
+  // Badge
+  const labels = { idle: 'Chờ', running: 'Đang chạy...', done: 'Hoàn thành', error: 'Lỗi' };
+  badge.textContent = labels[state] || state;
+  badge.className   = `pstep-badge ${state === 'idle' ? '' : state}`;
+
+  // Detail panel
+  if (state === 'idle') {
+    if (detail) detail.style.display = 'none';
+    return;
+  }
+  if (detail) detail.style.display = 'flex';
+  if (time && timeMs != null) time.textContent = `Thời gian: ${(timeMs / 1000).toFixed(1)}s`;
+
+  // Extra info (e.g. cached mediaId)
+  const cachedEl = $(`#pcached-${step}`);
+  if (cachedEl && extra) cachedEl.textContent = extra;
+
+  // Retry button — show only on done/error
+  if (retry) retry.style.display = (state === 'done' || state === 'error') ? 'inline-block' : 'none';
+}
+
+function pipelineShow() {
+  const card = $('#pipelineCard');
+  if (card) card.style.display = 'flex';
+}
+
+function pipelineReset() {
+  pipelineCache.prompt  = null;
+  pipelineCache.mediaId = null;
+  ['prompt', 'upload', 'generate'].forEach(s => pipelineSetStep(s, 'idle', null, ''));
+  const card = $('#pipelineCard');
+  if (card) card.style.display = 'none';
+}
+
+// Wire retry buttons once DOM ready
+function initPipelineButtons() {
+  $('#pipelineResetBtn')?.addEventListener('click', () => {
+    pipelineReset();
+    toast('Pipeline đã reset. Bạn có thể tạo lại từ đầu.', 'info');
+  });
+
+  // Retry from step 1 (prompt) — clears all cache
+  $('#pretry-prompt')?.addEventListener('click', () => {
+    pipelineCache.prompt  = null;
+    pipelineCache.mediaId = null;
+    ['prompt', 'upload', 'generate'].forEach(s => pipelineSetStep(s, 'idle'));
+    runPipeline();
+  });
+
+  // Retry from step 2 (upload) — keeps prompt, clears mediaId
+  $('#pretry-upload')?.addEventListener('click', () => {
+    pipelineCache.mediaId = null;
+    pipelineSetStep('upload', 'idle');
+    pipelineSetStep('generate', 'idle');
+    runPipeline();
+  });
+
+  // Retry from step 3 (generate) — keeps both prompt & mediaId
+  $('#pretry-generate')?.addEventListener('click', () => {
+    pipelineSetStep('generate', 'idle');
+    runPipeline();
+  });
+}
+
+// Main pipeline runner — skips already-cached steps
+async function runPipeline() {
+  isGenerating = true;
+  isGeneratingR3d = true;
+  validateForm();
+  pipelineShow();
+
+  // Show loading state on button
+  const btnText    = $('#btnGenerateText');
+  const btnLoading = $('#btnGenerate .btn-loading');
+  if (btnText)    btnText.style.display = 'none';
+  if (btnLoading) btnLoading.style.display = 'flex';
+
+  const updateStatus = (msg) => {
+    const el = $('#mainLoadingStatus');
+    if (el) el.textContent = msg;
+  };
+
+  try {
+    // ── STEP 1: Prompt ──────────────────────
+    if (!pipelineCache.prompt) {
+      pipelineSetStep('prompt', 'running');
+      updateStatus('Đang phân tích ảnh & tạo prompt...');
+      const t0 = Date.now();
+
+      let finalPrompt;
+      if (designMode === 'keepstyle') {
+        // Collect decor options
+        const getChecked = id => [...$$(`#${id} input[type="checkbox"]:checked`)].map(e => e.value);
+        const outputMode = $(`#r3dOutputMode .pill-btn.active`)?.dataset.value || '3d-photorealistic';
+        const lighting   = getChecked('decorLighting');
+        const soft       = getChecked('decorSoft');
+        const wall       = getChecked('decorWall');
+
+        const fd = new FormData();
+        fd.append('image', selectedImageFile);
+        fd.append('outputMode', outputMode);
+        fd.append('decorLighting', JSON.stringify(lighting));
+        fd.append('decorSoft', JSON.stringify(soft));
+        fd.append('decorWall', JSON.stringify(wall));
+
+        const res  = await fetch(`${window.API || ''}/api/render3d-prompt`, { method: 'POST', body: fd });
+        let data3d;
+        try { data3d = await res.json(); } catch { throw new Error(`Server lỗi ${res.status}: ${res.statusText}`); }
+        if (!res.ok || data3d?.error) throw new Error(data3d?.error || `Lỗi tạo prompt 3D (${res.status})`);
+        finalPrompt = data3d.prompt;
+        if (!finalPrompt) throw new Error('Server không trả về prompt hợp lệ.');
+      } else {
+        // Redesign mode — use interior-prompt
+        const interiorType  = selectedInteriorType || 'living-room';
+        const colorVal      = selectedColor !== 'custom' ? selectedColor : ($('#customColor')?.value.trim() || selectedColor);
+        const styleVal      = selectedStyle || 'modern';
+        const fd = new FormData();
+        fd.append('image', selectedImageFile);
+        fd.append('interiorType', interiorType);
+        fd.append('color', colorVal);
+        fd.append('style', styleVal);
+
+        const res  = await fetch(`${window.API || ''}/api/interior-prompt`, { method: 'POST', body: fd });
+        let data;
+        try { data = await res.json(); } catch { throw new Error(`Server lỗi ${res.status}: ${res.statusText}`); }
+        if (!res.ok || data?.error) throw new Error(data?.error || `Lỗi tạo prompt (${res.status})`);
+        finalPrompt = data.prompt;
+        if (!finalPrompt) throw new Error('Server không trả về prompt hợp lệ.');
+      }
+
+      const elapsed = Date.now() - t0;
+      pipelineCache.prompt = { text: finalPrompt, elapsed };
+      pipelineSetStep('prompt', 'done', elapsed, '');
+      if ($('#resultPrompt')) $('#resultPrompt').value = finalPrompt;
+    } else {
+      pipelineSetStep('prompt', 'done', pipelineCache.prompt.elapsed, 'Dùng prompt đã cache');
+    }
+
+    // ── STEP 2: Upload ──────────────────────
+    if (!pipelineCache.mediaId) {
+      pipelineSetStep('upload', 'running');
+      updateStatus('Đang upload ảnh lên Cloud...');
+      const t0 = Date.now();
+
+      const fd = new FormData();
+      fd.append('image', selectedImageFile);
+      const res  = await fetch(`${window.API || ''}/api/upload-image`, { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const mediaId = data.media?.name;
+      if (!mediaId) throw new Error('Upload thất bại — không nhận được mediaId.');
+
+      const elapsed = Date.now() - t0;
+      pipelineCache.mediaId = { id: mediaId, elapsed };
+      pipelineSetStep('upload', 'done', elapsed, `ID: ${mediaId}`);
+    } else {
+      pipelineSetStep('upload', 'done', pipelineCache.mediaId.elapsed, `Dùng lại: ${pipelineCache.mediaId.id}`);
+    }
+
+    // ── STEP 3: Generate ────────────────────
+    pipelineSetStep('generate', 'running');
+    updateStatus('AI đang tạo ảnh...');
+    const t0gen = Date.now();
+
+    const finalPrompt = pipelineCache.prompt.text;
+    const mediaId     = pipelineCache.mediaId.id;
+
+    // Get output settings
+    const ratioSel = designMode === 'keepstyle' ? $('#r3dRatio') : $('#outputRatio');
+    const qtySel   = designMode === 'keepstyle' ? $('#r3dQuantity') : $('#outputQuantity');
+    let   outputRatio = ratioSel?.value || 'ORIGINAL';
+    const quantity    = parseInt(qtySel?.value) || 1;
+    if (outputRatio === 'ORIGINAL') outputRatio = await getImageClosestRatio(selectedImageFile);
+
+    const taskPromises = [];
+    for (let q = 0; q < quantity; q++) {
+      taskPromises.push((async () => {
+        const res  = await fetch(`${window.API || ''}/api/image-to-image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: finalPrompt, quantity: 1, ratio: outputRatio, model: 'Nano_Banana_Pro', mediaId })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        const taskId = data.taskid || data.taskId;
+        if (!taskId) throw new Error('Không nhận được taskId.');
+        return taskId;
+      })());
+    }
+
+    const taskIds    = await Promise.all(taskPromises);
+    const pollResults = await Promise.all(taskIds.map(id => pollGenerationStatus(id, () => {}, 60)));
+
+    const results = [];
+    pollResults.forEach(r => { if (r.result?.length > 0) results.push(...r.result); });
+    if (!results.length) throw new Error('AI không trả về kết quả.');
+
+    const elapsed = Date.now() - t0gen;
+    pipelineSetStep('generate', 'done', elapsed);
+
+    // ── Display results ──
+    const resultImageWrapper = $('#resultImageWrapper');
+    const resultGridWrapper  = $('#resultGridWrapper');
+
+    if (quantity === 1) {
+      const proxyUrl = `${window.API || ''}/api/proxy-image?url=${encodeURIComponent(results[0]?.fifeUrl)}`;
+      $('#resultImage').src = proxyUrl;
+      $('#btnDownload').href = proxyUrl;
+      $('#resultImage').onclick = () => openLightbox(proxyUrl);
+      if (resultImageWrapper) resultImageWrapper.style.display = 'block';
+      if (resultGridWrapper)  resultGridWrapper.style.display  = 'none';
+      saveToHistory(proxyUrl, finalPrompt);
+    } else {
+      if (resultImageWrapper) resultImageWrapper.style.display = 'none';
+      if (resultGridWrapper) {
+        resultGridWrapper.innerHTML = '';
+        resultGridWrapper.style.display = 'grid';
+        results.forEach(item => {
+          const proxyUrl = `${window.API || ''}/api/proxy-image?url=${encodeURIComponent(item.fifeUrl)}`;
+          const img = document.createElement('img');
+          img.src = proxyUrl;
+          img.style.cssText = 'width:100%;border-radius:var(--radius-md);cursor:pointer;border:1px solid rgba(255,255,255,0.08);transition:transform 0.2s;';
+          img.onmouseenter = () => img.style.transform = 'scale(1.02)';
+          img.onmouseleave = () => img.style.transform = '';
+          img.onclick = () => openLightbox(proxyUrl);
+          resultGridWrapper.appendChild(img);
+          saveToHistory(proxyUrl, finalPrompt);
+        });
+        if (results[0]?.fifeUrl) $('#btnDownload').href = `${window.API || ''}/api/proxy-image?url=${encodeURIComponent(results[0].fifeUrl)}`;
+      }
+    }
+
+    const placeholder = $('#resultPlaceholder');
+    if (placeholder) placeholder.style.display = 'none';
+    $('#resultSection').style.display = 'block';
+    switchTab('tab-result');
+    toast('Tạo ảnh thành công!', 'success');
+
+  } catch (err) {
+    console.error(err);
+    // Mark the failing step
+    ['generate', 'upload', 'prompt'].forEach(s => {
+      const badge = $(`#pbadge-${s}`);
+      if (badge && badge.classList.contains('running')) {
+        pipelineSetStep(s, 'error', null);
+      }
+    });
+    toast(`Lỗi: ${err.message}`, 'error');
+  } finally {
+    isGenerating = false;
+    isGeneratingR3d = false;
+    if (btnText)    btnText.style.display = '';
+    if (btnLoading) btnLoading.style.display = 'none';
+    validateForm();
+  }
+}
