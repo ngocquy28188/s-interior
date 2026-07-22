@@ -2,7 +2,10 @@
    Banana AI — Default Config
    ════════════════════════════════════════════ */
 
-window.API = 'http://localhost:3100';
+// Local dev → absolute URL; production → relative (same domain via Vercel)
+window.API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:3100'
+  : '';
 
 window.BANANA_CONFIG = {
   // All API credentials (tokens, openrouter keys, and database logins)
