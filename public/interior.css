@@ -6,18 +6,21 @@
   --bg-app: radial-gradient(circle at top, #161624 0%, #0a0a0f 100%);
   --bg-card: rgba(26, 26, 38, 0.45);
   --bg-card-hover: rgba(34, 34, 50, 0.6);
+  --bg-input: rgba(20, 20, 32, 0.7);
   --border-card: rgba(255, 255, 255, 0.06);
-  --border-card-active: rgba(212, 175, 55, 0.5); /* Gold outline */
-  
+  --border-card-active: rgba(212, 175, 55, 0.5);
+  --border: rgba(255, 255, 255, 0.08);
+
   --primary-gold: #d4af37;
   --primary-gold-dark: #b89028;
   --primary-gold-light: #f3e5ab;
   --accent-glow: rgba(212, 175, 55, 0.15);
-  
+
   --text: #f0f0f5;
   --text-muted: #9595a5;
   --text-inverse: #0a0a0f;
-  
+  --danger: #ef4444;
+
   --font: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-serif: 'Playfair Display', Georgia, serif;
   --radius-lg: 20px;
@@ -25,6 +28,7 @@
   --radius-sm: 8px;
   --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --tabbar-h: 62px;
 }
 
 /* Base Styles */
@@ -53,8 +57,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 24px 16px;
-  gap: 20px;
+  padding: 20px 16px calc(var(--tabbar-h) + 24px);
+  gap: 16px;
 }
 
 /* Header */
@@ -150,11 +154,11 @@ body {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 14px 16px;
   box-shadow: var(--shadow-premium);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   transition: var(--transition);
 }
 
@@ -165,21 +169,22 @@ body {
 }
 
 .step-num {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: rgba(212, 175, 55, 0.12);
   border: 1px solid rgba(212, 175, 55, 0.25);
   color: var(--primary-gold);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .card-header h2 {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
 }
@@ -188,7 +193,7 @@ body {
 .upload-area {
   position: relative;
   width: 100%;
-  min-height: 180px;
+  min-height: 120px;
   border: 2px dashed rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-md);
   display: flex;
@@ -220,16 +225,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   color: var(--text-muted);
   text-align: center;
-  padding: 24px;
+  padding: 16px;
 }
 
 .upload-content svg {
+  width: 32px;
+  height: 32px;
   color: var(--primary-gold);
   opacity: 0.8;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   transition: var(--transition);
 }
 
@@ -239,19 +246,20 @@ body {
 }
 
 .upload-title {
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text);
 }
 
 .upload-subtitle {
-  font-size: 12px;
+  font-size: 11px;
+  display: none;
 }
 
 /* Preview Image */
 .preview-container {
   width: 100%;
-  height: 240px;
+  height: 190px;
   position: relative;
   display: flex;
   align-items: center;
@@ -649,7 +657,8 @@ body {
   width: 100%;
   background: linear-gradient(135deg, var(--primary-gold-light) 0%, var(--primary-gold) 100%);
   color: var(--text-inverse);
-  padding: 16px 24px;
+  padding: 13px 20px;
+  font-size: 13px;
   box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
 }
 
@@ -909,182 +918,71 @@ body {
   font-size: 11px;
 }
 
-/* Responsive adjustments */
+/* ── Mobile (PWA scroll mode) ───────────────────────────────── */
 @media (max-width: 480px) {
   body {
-    height: 100dvh !important;
-    overflow: hidden !important;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   .app-container {
-    padding: 8px 10px 60px 10px !important;
-    gap: 8px !important;
-    height: 100dvh !important;
-    overflow: hidden !important;
+    height: 100dvh;
+    overflow: hidden;
+    padding: 10px 12px 0;
+    gap: 10px;
   }
 
   .app-header {
-    padding-bottom: 4px !important;
-  }
-  
-  .logo-circle {
-    width: 36px !important;
-    height: 36px !important;
-  }
-  
-  .logo-emoji {
-    font-size: 18px !important;
-  }
-  
-  .logo-text h1 {
-    font-size: 14px !important;
-  }
-  
-  .logo-text p {
-    font-size: 9px !important;
+    padding-bottom: 2px;
   }
 
+  .logo-text h1  { font-size: 14px; }
+  .logo-text p   { font-size: 9px; }
+
   .app-main {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    padding-bottom: 12px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: calc(var(--tabbar-h) + 8px);
+    /* smooth momentum scroll on iOS */
+    -webkit-overflow-scrolling: touch;
   }
 
   .card {
-    padding: 10px 12px !important;
-    gap: 8px !important;
-    border-radius: 12px !important;
+    padding: 12px 14px;
+    gap: 10px;
+    border-radius: 14px;
   }
 
-  .card-header {
-    gap: 8px !important;
-  }
-
-  .card-header h2 {
-    font-size: 13px !important;
-  }
-
-  .step-num {
-    width: 22px !important;
-    height: 22px !important;
-    font-size: 11px !important;
-  }
-
-  /* Upload Section */
-  .upload-area {
-    min-height: 100px !important;
-  }
-
-  .upload-content {
-    padding: 12px !important;
-    gap: 6px !important;
-  }
+  .upload-area   { min-height: 100px; }
 
   .upload-content svg {
-    width: 28px !important;
-    height: 28px !important;
-    margin-bottom: 0 !important;
+    width: 28px;
+    height: 28px;
   }
 
-  .upload-title {
-    font-size: 11.5px !important;
-  }
+  .preview-container { height: 150px; }
 
-  .preview-container {
-    height: 120px !important;
-  }
-
-  /* Curtain categories grid */
-  .curtain-grid, .color-palette, .install-options {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 6px !important;
-  }
-
-  .curtain-card, .color-item, .install-item {
-    padding: 6px 8px !important;
-    height: 56px !important;
-    min-height: auto !important;
-    gap: 4px !important;
-    border-radius: 6px !important;
-  }
-
-  .preset-icon-container {
-    width: 22px !important;
-    height: 22px !important;
-  }
-
-  .preset-icon-container svg {
-    width: 12px !important;
-    height: 12px !important;
-  }
-
-  .curtain-icon {
-    font-size: 12px !important;
-  }
-
-  .curtain-name {
-    font-size: 10.5px !important;
-  }
-
-  /* Option field & color palette */
-  .options-group {
-    gap: 10px !important;
-  }
-
-  .option-field {
-    gap: 6px !important;
-  }
-
-  .option-field label {
-    font-size: 10px !important;
-    margin-bottom: 1px !important;
-  }
-
-  .color-palette {
-    gap: 6px !important;
-  }
-
-  .color-dot {
-    width: 22px !important;
-    height: 22px !important;
-  }
-
-  .custom-color-wrap input {
-    padding: 5px 8px !important;
-    font-size: 11px !important;
-    border-radius: 6px !important;
-  }
-
+  .curtain-grid,
+  .color-palette,
   .install-options {
-    gap: 6px !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
   }
 
-  .install-btn {
-    padding: 4px 10px !important;
-    font-size: 10px !important;
-  }
-
-  .advanced-toggle {
-    font-size: 11px !important;
-    padding: 6px 0 !important;
-  }
-
-  /* Action button */
-  .action-container {
-    margin-top: 4px !important;
-  }
-
-  .btn-primary {
-    padding: 10px 16px !important;
-    font-size: 12px !important;
-    border-radius: 8px !important;
+  .curtain-card,
+  .color-item,
+  .install-item {
+    height: 56px;
+    gap: 4px;
+    border-radius: 8px;
   }
 }
 
-/* ────── PWA Tabs Styles ────── */
+/* ────── PWA Tab Bar ────── */
 .pwa-tabbar {
   position: fixed;
   bottom: 0;
@@ -1092,74 +990,89 @@ body {
   transform: translateX(-50%);
   width: 100%;
   max-width: 600px;
-  background: rgba(20, 20, 30, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  height: var(--tabbar-h);
+  background: rgba(14, 14, 22, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
   display: flex;
   justify-content: space-around;
-  padding: 8px 0;
+  align-items: stretch;
+  padding: 6px 4px 8px;
   z-index: 999;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.45);
 }
 
 .tab-item {
   background: transparent;
   border: none;
   display: flex;
-  flex-direction: row; /* Horizontal layout */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  color: #a89b8d; /* Muted warm color from reference image */
+  gap: 3px;
+  color: rgba(200, 190, 175, 0.55);
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 4px 6px;
+  border-radius: 10px;
   transition: all 0.2s ease;
   flex: 1;
+  min-width: 0;
   position: relative;
 }
 
-/* Left indicator stripe for active tab */
-.tab-item::before {
+/* Top indicator dot for active tab */
+.tab-item::after {
   content: '';
   position: absolute;
-  left: 0;
-  top: 20%;
-  height: 60%;
-  width: 3px;
-  background: transparent;
-  border-radius: 0 4px 4px 0;
-  transition: all 0.2s ease;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 20px;
+  height: 2px;
+  background: var(--primary-gold);
+  border-radius: 0 0 3px 3px;
+  transition: transform 0.2s ease;
 }
 
 .tab-item:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.02);
+  color: rgba(240, 235, 220, 0.8);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .tab-item.active {
-  color: var(--primary-gold) !important;
-  background: rgba(212, 175, 55, 0.08) !important;
+  color: var(--primary-gold);
+  background: rgba(212, 175, 55, 0.07);
 }
 
-.tab-item.active::before {
-  background: var(--primary-gold) !important;
+.tab-item.active::after {
+  transform: translateX(-50%) scaleX(1);
 }
 
 .tab-icon {
-  font-size: 14px; /* Make icon even smaller */
-  transition: all 0.2s ease;
+  font-size: 17px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.tab-item.active .tab-icon {
+  transform: translateY(-1px);
 }
 
 .tab-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
   transition: all 0.2s ease;
 }
 
-/* Tab Content Visibility */
+/* Tab Content */
 .tab-content {
   display: none;
   flex-direction: column;
@@ -1172,8 +1085,8 @@ body {
 }
 
 @keyframes fadeInTab {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Placeholders inside tabs */
@@ -1211,76 +1124,8 @@ body {
   line-height: 1.4;
 }
 
-/* ────── Compact Layout Enhancements ────── */
-.card {
-  padding: 14px 16px !important;
-  gap: 12px !important;
-}
-
-.step-num {
-  width: 22px !important;
-  height: 22px !important;
-  font-size: 11px !important;
-}
-
-.card-header h2 {
-  font-size: 13px !important;
-}
-
-/* Step 1: Upload Area Compact styling */
-.upload-area {
-  min-height: 110px !important;
-}
-
-.upload-content {
-  padding: 12px !important;
-  gap: 6px !important;
-}
-
-.upload-content svg {
-  width: 32px !important;
-  height: 32px !important;
-}
-
-.upload-title {
-  font-size: 12px !important;
-}
-
-.upload-subtitle {
-  display: none !important;
-}
-
-.preview-container {
-  height: 180px !important;
-}
-
-/* Uniform selection styling active */
-
-/* Step 3 & Option Customizations (Desktop values, mobile uses overrides above) */
-.color-dot {
-  width: 26px !important;
-  height: 26px !important;
-}
-
-.custom-color-wrap input {
-  padding: 6px 10px !important;
-  font-size: 12px !important;
-}
-
-.install-btn {
-  padding: 6px 12px !important;
-  font-size: 11.5px !important;
-}
-
-.option-field label {
-  font-size: 11.5px !important;
-}
-
-/* Action button padding optimization */
-.btn-primary {
-  padding: 12px 20px !important;
-  font-size: 13px !important;
-}
+/* ────── Compact Layout (global defaults) ────── */
+/* These are the actual target values — no need for !important overrides elsewhere */
 
 /* Settings Button & Layout */
 .btn-settings-toggle {
@@ -2190,7 +2035,4 @@ body {
   border-color: var(--primary-gold);
 }
 
-/* ─── Tab bar text-only ─── */
-.pwa-tabbar .tab-icon { display: none; }
-.pwa-tabbar .tab-item { min-height: 44px; }
-.pwa-tabbar .tab-label { font-size: 12.5px; font-weight: 700; }
+/* tab bar icon+label — handled above in .pwa-tabbar section */
