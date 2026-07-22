@@ -68,12 +68,12 @@ async function getDynamicConfig() {
     const record = searchRes.items?.[0];
     if (record && record.data) {
       _cachedDbConfig = {
-        projectId: record.data.googleProjectId || record.data.projectId || CONFIG.projectId,
-        authorization: record.data.googleAuth || record.data.authorization || CONFIG.authorization,
-        apiKey: record.data.maxStudioKey || record.data.apiKey || CONFIG.apiKey,
-        openrouterKey: record.data.openrouterKey || CONFIG.openrouterKey,
-        pbEmail: record.data.pbEmail || CONFIG.pbEmail,
-        pbPassword: record.data.pbPassword || CONFIG.pbPassword
+        projectId: CONFIG.projectId || record.data.googleProjectId || record.data.projectId,
+        authorization: CONFIG.authorization || record.data.googleAuth || record.data.authorization,
+        apiKey: CONFIG.apiKey || record.data.maxStudioKey || record.data.apiKey,
+        openrouterKey: CONFIG.openrouterKey || record.data.openrouterKey,
+        pbEmail: CONFIG.pbEmail || record.data.pbEmail,
+        pbPassword: CONFIG.pbPassword || record.data.pbPassword
       };
       _cachedDbConfigTime = Date.now();
       return _cachedDbConfig;
