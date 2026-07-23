@@ -2539,11 +2539,6 @@ async function startMultiAngleAnalysis() {
   }
 
   const settings = JSON.parse(localStorage.getItem('banana_settings') || '{}');
-  if (!settings.openrouterKey) {
-    toast('⚠️ Vui lòng nhập OpenRouter API Key trong Cài đặt', 'error');
-    switchTab('tab-settings');
-    return;
-  }
 
   const checkboxes = document.querySelectorAll('#maAngleOptions input[type="checkbox"]:checked');
   const angles = Array.from(checkboxes).map(cb => cb.value);
@@ -2558,7 +2553,7 @@ async function startMultiAngleAnalysis() {
 
   try {
     const formData = new FormData();
-    formData.append('openrouterKey', settings.openrouterKey);
+    if (settings.openrouterKey) formData.append('openrouterKey', settings.openrouterKey);
     formData.append('angles', JSON.stringify(angles));
     maImages.forEach(img => formData.append('images', img.file));
 
